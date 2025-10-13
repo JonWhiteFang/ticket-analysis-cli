@@ -29,7 +29,7 @@ from ..models import (
     AuthenticationError,
     MCPError
 )
-from ..external import MCPClient, MCPRequestFormatter
+from ..external import MCPClient
 
 logger = logging.getLogger(__name__)
 
@@ -231,7 +231,6 @@ class MCPTicketRepository(DataRetrievalInterface, TicketRepositoryInterface):
         self._authenticator = authenticator
         self._sanitizer = sanitizer
         self._validator = validator
-        self._request_formatter = MCPRequestFormatter()
         self._data_mapper = TicketDataMapper()
         
         # Connection state
@@ -311,7 +310,7 @@ class MCPTicketRepository(DataRetrievalInterface, TicketRepositoryInterface):
             self._ensure_connection()
             
             # Format search request
-            search_params = self._request_formatter.format_search_request(criteria)
+            search_params = criteria.to_dict()
             
             # Sanitize search parameters if sanitizer is available
             if self._sanitizer:

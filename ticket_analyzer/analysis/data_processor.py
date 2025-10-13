@@ -564,8 +564,9 @@ class DataCleaner:
         
         # Clean whitespace
         return assignee.strip()
-c
-lass EdgeCaseHandler:
+
+
+class EdgeCaseHandler:
     """Handler for various edge cases in ticket data processing."""
     
     def __init__(self) -> None:

@@ -153,9 +153,9 @@ class TrendAnalyzer(TrendAnalysisStrategy):
             'anomalies',
             'growth_patterns',
             'correlation_patterns'
-        ]    
-    d
-ef _filter_tickets_by_period(self, tickets: List[Ticket], period: timedelta) -> List[Ticket]:
+        ]
+    
+    def _filter_tickets_by_period(self, tickets: List[Ticket], period: timedelta) -> List[Ticket]:
         """Filter tickets to those created within the specified time period.
         
         Args:

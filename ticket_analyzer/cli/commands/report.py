@@ -20,7 +20,7 @@ from ..utils import (
     warning_message,
     list_files_with_details
 )
-from ..main import handle_cli_errors
+from ..shared import handle_cli_errors
 
 
 @click.group("report")

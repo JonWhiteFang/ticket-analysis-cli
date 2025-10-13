@@ -28,7 +28,7 @@ from ..utils import (
     format_table_output,
     validate_ticket_id_format
 )
-from ..main import (
+from ..shared import (
     add_option_groups,
     time_period_options,
     output_options,

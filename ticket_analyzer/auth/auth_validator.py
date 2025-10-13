@@ -15,8 +15,7 @@ from dataclasses import dataclass
 from ..models.exceptions import (
     AuthenticationError,
     ValidationError,
-    SecurityError,
-    AuthenticationTimeoutError
+    SecurityError
 )
 from ..models.config import AuthConfig
 
@@ -69,9 +68,9 @@ class AuthenticationValidator:
         (r'credential["\s]*[:=]["\s]*[^\s"]+', '[CREDENTIAL_REDACTED]'),
         (r'\b[A-Za-z0-9+/]{20,}={0,2}\b', '[TOKEN_REDACTED]'),  # Base64-like tokens
         (r'mwinit[^\s]*\s+[^\s]+', 'mwinit [ARGS_REDACTED]'),  # mwinit command args
-    ]    
- 
-   def __init__(self, config: Optional[AuthConfig] = None) -> None:
+    ]
+    
+    def __init__(self, config: Optional[AuthConfig] = None) -> None:
         """Initialize authentication validator.
         
         Args:
@@ -297,7 +296,7 @@ class AuthenticationValidator:
         context = context or {}
         
         # Map specific errors to user-friendly messages
-        if isinstance(error, AuthenticationTimeoutError):
+        if error.error_code == "AUTH_TIMEOUT":
             return self._create_timeout_error_message(error, context)
         elif isinstance(error, AuthenticationError):
             return self._create_auth_error_message(error, context)
@@ -308,7 +307,7 @@ class AuthenticationValidator:
         else:
             return self._create_generic_error_message(error, context)
     
-    def _create_timeout_error_message(self, error: AuthenticationTimeoutError, 
+    def _create_timeout_error_message(self, error: AuthenticationError, 
                                     context: Dict[str, Any]) -> str:
         """Create user-friendly timeout error message."""
         timeout_duration = error.get_detail("timeout_duration", "unknown")

@@ -19,7 +19,7 @@ from ..utils import (
     warning_message,
     format_config_display
 )
-from ..main import handle_cli_errors
+from ..shared import handle_cli_errors
 
 
 @click.group("config")
