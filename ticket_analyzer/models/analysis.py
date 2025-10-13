@@ -165,6 +165,7 @@ class AnalysisResult:
     summary: Dict[str, Any] = field(default_factory=dict)
     generated_at: datetime = field(default_factory=datetime.now)
     ticket_count: int = 0
+    original_count: int = 0
     date_range: Optional[tuple] = None
     analysis_duration: Optional[float] = None
     metadata: Dict[str, Any] = field(default_factory=dict)
