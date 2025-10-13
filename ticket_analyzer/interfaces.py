@@ -64,6 +64,63 @@ class AuthenticationInterface(ABC):
         pass
 
 
+class AuthenticationSessionInterface(ABC):
+    """Abstract interface for authentication session management."""
+    
+    @abstractmethod
+    def start_session(self) -> None:
+        """Start a new authentication session.
+        
+        Raises:
+            AuthenticationError: If session cannot be started.
+        """
+        pass
+    
+    @abstractmethod
+    def end_session(self) -> None:
+        """End the current authentication session."""
+        pass
+    
+    @abstractmethod
+    def is_session_valid(self) -> bool:
+        """Check if the current session is valid.
+        
+        Returns:
+            True if session is valid and not expired, False otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def get_session_duration(self) -> Optional[datetime]:
+        """Get the duration of the current session.
+        
+        Returns:
+            Session duration as datetime, None if no active session.
+        """
+        pass
+    
+    @abstractmethod
+    def refresh_session(self) -> bool:
+        """Refresh the current session to extend its validity.
+        
+        Returns:
+            True if session was successfully refreshed, False otherwise.
+            
+        Raises:
+            AuthenticationError: If session refresh fails.
+        """
+        pass
+    
+    @abstractmethod
+    def get_session_metadata(self) -> Dict[str, Any]:
+        """Get metadata about the current session.
+        
+        Returns:
+            Dictionary containing session metadata (start time, last activity, etc.).
+        """
+        pass
+
+
 # Data Retrieval Interfaces
 class DataRetrievalInterface(ABC):
     """Abstract interface for ticket data retrieval operations."""
