@@ -84,7 +84,7 @@ Repository = "https://github.com/amazon/ticket-analyzer.git"
 "Bug Tracker" = "https://github.com/amazon/ticket-analyzer/issues"
 
 [project.scripts]
-ticket-analyzer = "ticket_analyzer.cli.main:main"
+ticket-analyzer = "ticket_analyzer.cli.main:cli"
 
 [tool.setuptools]
 packages = ["ticket_analyzer"]
