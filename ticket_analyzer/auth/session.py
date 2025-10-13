@@ -303,7 +303,7 @@ class AuthenticationSession(AuthenticationSessionInterface):
         """
         with self._lock:
             self._cleanup_callbacks.append(callback)
-            logger.debug("Added cleanup callback: %s", callback.__name__)
+            logger.debug("Added cleanup callback: %s", getattr(callback, '__name__', str(callback)))
     
     def remove_cleanup_callback(self, callback: Callable[[], None]) -> None:
         """Remove a cleanup callback.
@@ -314,7 +314,7 @@ class AuthenticationSession(AuthenticationSessionInterface):
         with self._lock:
             if callback in self._cleanup_callbacks:
                 self._cleanup_callbacks.remove(callback)
-                logger.debug("Removed cleanup callback: %s", callback.__name__)
+                logger.debug("Removed cleanup callback: %s", getattr(callback, '__name__', str(callback)))
     
     def get_time_until_expiry(self) -> Optional[timedelta]:
         """Get time remaining until session expires.
@@ -380,9 +380,9 @@ class AuthenticationSession(AuthenticationSessionInterface):
         for callback in self._cleanup_callbacks:
             try:
                 callback()
-                logger.debug("Executed cleanup callback: %s", callback.__name__)
+                logger.debug("Executed cleanup callback: %s", getattr(callback, '__name__', str(callback)))
             except Exception as e:
-                logger.error("Error in cleanup callback %s: %s", callback.__name__, e)
+                logger.error("Error in cleanup callback %s: %s", getattr(callback, '__name__', str(callback)), e)
     
     def __enter__(self) -> 'AuthenticationSession':
         """Context manager entry.

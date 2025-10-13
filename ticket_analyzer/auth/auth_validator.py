@@ -296,7 +296,7 @@ class AuthenticationValidator:
         context = context or {}
         
         # Map specific errors to user-friendly messages
-        if error.error_code == "AUTH_TIMEOUT":
+        if hasattr(error, 'error_code') and error.error_code == "AUTH_TIMEOUT":
             return self._create_timeout_error_message(error, context)
         elif isinstance(error, AuthenticationError):
             return self._create_auth_error_message(error, context)
