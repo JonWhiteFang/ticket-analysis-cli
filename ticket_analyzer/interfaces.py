@@ -364,7 +364,12 @@ class MetricsCalculatorInterface(ABC):
 
 # Reporting Interfaces
 class ReportingInterface(ABC):
-    """Abstract interface for report generation operations."""
+    """Abstract interface for report generation operations.
+    
+    This interface defines the contract for generating reports from analysis results
+    in various formats. Implementations should handle formatting, output generation,
+    and error handling for different report types.
+    """
     
     @abstractmethod
     def generate_report(self, analysis: AnalysisResult, config: ReportConfig) -> str:
@@ -372,10 +377,10 @@ class ReportingInterface(ABC):
         
         Args:
             analysis: Analysis results to include in report.
-            config: Configuration for report generation.
+            config: Configuration for report generation including format and output options.
             
         Returns:
-            Generated report content or file path.
+            Generated report content or file path depending on configuration.
             
         Raises:
             ReportGenerationError: If report generation fails.
@@ -387,16 +392,65 @@ class ReportingInterface(ABC):
         """Check if reporter supports the specified format.
         
         Args:
-            format_type: Format type to check (e.g., 'json', 'html').
+            format_type: Format type to check (e.g., 'cli', 'json', 'html', 'csv').
             
         Returns:
             True if format is supported, False otherwise.
         """
         pass
+    
+    @abstractmethod
+    def format_summary(self, analysis: AnalysisResult) -> str:
+        """Format analysis summary for display.
+        
+        Args:
+            analysis: Analysis results to summarize.
+            
+        Returns:
+            Formatted summary string.
+        """
+        pass
+    
+    @abstractmethod
+    def format_metrics(self, metrics: Dict[str, Any]) -> str:
+        """Format metrics data for display.
+        
+        Args:
+            metrics: Metrics dictionary to format.
+            
+        Returns:
+            Formatted metrics string.
+        """
+        pass
+    
+    @abstractmethod
+    def format_trends(self, trends: Dict[str, Any]) -> str:
+        """Format trend data for display.
+        
+        Args:
+            trends: Trends dictionary to format.
+            
+        Returns:
+            Formatted trends string.
+        """
+        pass
+    
+    @abstractmethod
+    def get_supported_formats(self) -> List[str]:
+        """Get list of supported output formats.
+        
+        Returns:
+            List of supported format strings.
+        """
+        pass
 
 
 class FormatterInterface(ABC):
-    """Abstract interface for data formatting operations."""
+    """Abstract interface for data formatting operations.
+    
+    This interface defines methods for formatting various types of data
+    for display in different contexts (CLI, HTML, etc.).
+    """
     
     @abstractmethod
     def format_data(self, data: Dict[str, Any]) -> str:
@@ -408,6 +462,106 @@ class FormatterInterface(ABC):
         Returns:
             Formatted string representation.
         """
+        pass
+    
+    @abstractmethod
+    def format_table(self, data: List[Dict[str, Any]], headers: List[str]) -> str:
+        """Format tabular data for display.
+        
+        Args:
+            data: List of row data dictionaries.
+            headers: List of column headers.
+            
+        Returns:
+            Formatted table string.
+        """
+        pass
+    
+    @abstractmethod
+    def format_key_value_pairs(self, data: Dict[str, Any]) -> str:
+        """Format key-value pairs for display.
+        
+        Args:
+            data: Dictionary of key-value pairs.
+            
+        Returns:
+            Formatted key-value string.
+        """
+        pass
+    
+    @abstractmethod
+    def apply_color_coding(self, text: str, color_type: str) -> str:
+        """Apply color coding to text based on type.
+        
+        Args:
+            text: Text to colorize.
+            color_type: Type of color to apply (success, error, warning, info).
+            
+        Returns:
+            Colorized text string.
+        """
+        pass
+
+
+class ProgressInterface(ABC):
+    """Abstract interface for progress indication and user feedback.
+    
+    This interface defines methods for displaying progress indicators,
+    status messages, and user feedback during long-running operations.
+    """
+    
+    @abstractmethod
+    def show_progress(self, current: int, total: int, description: str) -> None:
+        """Show progress indicator for ongoing operation.
+        
+        Args:
+            current: Current progress value.
+            total: Total expected value.
+            description: Description of the operation.
+        """
+        pass
+    
+    @abstractmethod
+    def update_status(self, message: str, status_type: str = "info") -> None:
+        """Update status message for user feedback.
+        
+        Args:
+            message: Status message to display.
+            status_type: Type of status (info, success, warning, error).
+        """
+        pass
+    
+    @abstractmethod
+    def start_operation(self, description: str) -> None:
+        """Start a new operation with progress tracking.
+        
+        Args:
+            description: Description of the operation being started.
+        """
+        pass
+    
+    @abstractmethod
+    def complete_operation(self, success: bool, message: str) -> None:
+        """Complete current operation and show result.
+        
+        Args:
+            success: Whether operation completed successfully.
+            message: Completion message to display.
+        """
+        pass
+    
+    @abstractmethod
+    def show_spinner(self, message: str) -> None:
+        """Show spinner for indeterminate progress.
+        
+        Args:
+            message: Message to display with spinner.
+        """
+        pass
+    
+    @abstractmethod
+    def hide_spinner(self) -> None:
+        """Hide currently displayed spinner."""
         pass
 
 

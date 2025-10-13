@@ -1,5 +1,47 @@
-"""Reporting module for CLI and HTML report generation."""
+"""Reporting module for ticket analysis CLI.
 
-from __future__ import annotations
+This module provides comprehensive reporting capabilities including:
+- CLI reporting with color coding and tabular formatting
+- Advanced table formatters with responsive layouts
+- Progress indicators and user feedback management
+- Multiple output formats and presentation styles
+"""
 
-__all__ = []
+from .cli_reporter import CLIReporter, CLIColorScheme, CLITableFormatter
+from .formatters import (
+    TableFormatter, 
+    ColorScheme, 
+    ColorType, 
+    TableAlignment, 
+    TableColumn,
+    ResponsiveFormatter
+)
+from .progress import (
+    ProgressManager, 
+    StatusType, 
+    SpinnerType, 
+    OperationTimer,
+    BatchProgressManager
+)
+
+__all__ = [
+    # CLI Reporter
+    'CLIReporter',
+    'CLIColorScheme', 
+    'CLITableFormatter',
+    
+    # Formatters
+    'TableFormatter',
+    'ColorScheme',
+    'ColorType',
+    'TableAlignment',
+    'TableColumn',
+    'ResponsiveFormatter',
+    
+    # Progress Management
+    'ProgressManager',
+    'StatusType',
+    'SpinnerType',
+    'OperationTimer',
+    'BatchProgressManager',
+]
