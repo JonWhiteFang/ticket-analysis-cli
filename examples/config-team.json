@@ -1,0 +1,73 @@
+{
+  "_comment": "Team Configuration Template - Customized for team-specific analysis",
+  "_description": "Template configuration for team-specific ticket analysis. Replace placeholder values with your team's actual settings.",
+  
+  "output": {
+    "default_format": "html",
+    "max_results": 1000,
+    "output_directory": "./team-reports"
+  },
+  
+  "authentication": {
+    "timeout_seconds": 60,
+    "check_interval_seconds": 300
+  },
+  
+  "analysis": {
+    "default_date_range_days": 30,
+    "include_weekends": false,
+    "business_hours": {
+      "start": "09:00",
+      "end": "17:00"
+    },
+    "timezone": "US/Pacific"
+  },
+  
+  "reporting": {
+    "html": {
+      "theme": "corporate",
+      "include_charts": true
+    }
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "sanitize_logs": true,
+    "log_file": "~/.ticket-analyzer/logs/team-analysis.log"
+  },
+  
+  "filters": {
+    "default_status": ["Open", "In Progress", "Resolved"],
+    "exclude_test_tickets": true,
+    "resolver_groups": [
+      "YOUR_TEAM_NAME_HERE",
+      "RELATED_TEAM_NAME_HERE"
+    ]
+  },
+  
+  "_team_customization": {
+    "_instructions": "Replace the following placeholders with your team's actual values:",
+    "_resolver_groups": "Update the resolver_groups array with your team's actual resolver group names",
+    "_timezone": "Set timezone to match your team's primary location",
+    "_business_hours": "Adjust business hours to match your team's working hours",
+    "_output_directory": "Set output directory to your team's shared location if applicable"
+  },
+  
+  "_common_team_settings": {
+    "_description": "Common configurations for different team types",
+    "_development_teams": {
+      "default_status": ["Open", "In Progress", "Code Review", "Testing", "Resolved"],
+      "business_hours": { "start": "10:00", "end": "18:00" }
+    },
+    "_support_teams": {
+      "default_status": ["Open", "Assigned", "Escalated", "Resolved"],
+      "business_hours": { "start": "08:00", "end": "20:00" },
+      "include_weekends": true
+    },
+    "_operations_teams": {
+      "default_status": ["Open", "Investigating", "Monitoring", "Resolved"],
+      "business_hours": { "start": "00:00", "end": "23:59" },
+      "include_weekends": true
+    }
+  }
+}

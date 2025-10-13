@@ -1,0 +1,18 @@
+{
+  "_comment": "Minimal Configuration Example - Basic settings for getting started",
+  "_description": "This configuration includes only the essential settings needed to run the ticket analyzer. Copy to ~/.ticket-analyzer/config.json and customize as needed.",
+  
+  "output": {
+    "default_format": "table",
+    "max_results": 100
+  },
+  
+  "authentication": {
+    "timeout_seconds": 60
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "sanitize_logs": true
+  }
+}

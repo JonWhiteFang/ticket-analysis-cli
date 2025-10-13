@@ -1,0 +1,238 @@
+{
+  "_comment": "Ticket Analysis CLI Configuration Example (JSON Format)",
+  "_description": "This is a comprehensive example configuration file showing all available options with detailed explanations. Copy this file to ~/.ticket-analyzer/config.json and modify according to your needs.",
+  
+  "output": {
+    "_comment": "Output formatting and display options",
+    "default_format": "table",
+    "_format_options": ["table", "json", "csv", "html"],
+    "_format_description": "Default output format when not specified via CLI",
+    
+    "max_results": 1000,
+    "_max_results_description": "Maximum number of tickets to retrieve in a single query (1-10000)",
+    
+    "sanitize_output": true,
+    "_sanitize_description": "Automatically remove PII and sensitive data from all outputs",
+    
+    "color_output": true,
+    "_color_description": "Enable color coding in CLI output (disable for non-interactive use)",
+    
+    "progress_indicators": true,
+    "_progress_description": "Show progress bars during long-running operations",
+    
+    "output_directory": "./reports",
+    "_output_dir_description": "Default directory for saving report files (relative or absolute path)"
+  },
+  
+  "authentication": {
+    "_comment": "Authentication and security settings",
+    "timeout_seconds": 60,
+    "_timeout_description": "Maximum time to wait for authentication operations (30-300 seconds)",
+    
+    "max_retry_attempts": 3,
+    "_retry_description": "Number of retry attempts for failed authentication (1-5)",
+    
+    "check_interval_seconds": 300,
+    "_check_interval_description": "How often to verify authentication status (60-3600 seconds)",
+    
+    "session_duration_hours": 8,
+    "_session_description": "Maximum authentication session duration (1-24 hours)"
+  },
+  
+  "data_retrieval": {
+    "_comment": "Data access and MCP integration settings",
+    "connection_timeout": 30,
+    "_connection_timeout_description": "Timeout for MCP connections (10-120 seconds)",
+    
+    "read_timeout": 60,
+    "_read_timeout_description": "Timeout for data retrieval operations (30-300 seconds)",
+    
+    "retry_attempts": 3,
+    "_retry_attempts_description": "Number of retry attempts for failed data operations",
+    
+    "batch_size": 100,
+    "_batch_size_description": "Number of tickets to process in each batch (50-500)",
+    
+    "rate_limit_delay": 1.0,
+    "_rate_limit_description": "Delay between API calls to respect rate limits (0.1-5.0 seconds)",
+    
+    "circuit_breaker": {
+      "failure_threshold": 5,
+      "_failure_threshold_description": "Number of failures before opening circuit breaker",
+      
+      "timeout_minutes": 2,
+      "_timeout_description": "How long to keep circuit breaker open (1-10 minutes)"
+    }
+  },
+  
+  "analysis": {
+    "_comment": "Analysis and metrics calculation settings",
+    "default_date_range_days": 30,
+    "_date_range_description": "Default number of days to analyze when no date range specified",
+    
+    "include_weekends": true,
+    "_weekends_description": "Include weekends in business day calculations",
+    
+    "business_hours": {
+      "start": "09:00",
+      "end": "17:00",
+      "_hours_description": "Business hours for resolution time calculations (24-hour format)"
+    },
+    
+    "timezone": "UTC",
+    "_timezone_description": "Timezone for date/time calculations (e.g., 'UTC', 'US/Pacific', 'US/Eastern')",
+    
+    "metrics": {
+      "resolution_time": true,
+      "status_distribution": true,
+      "assignee_workload": true,
+      "priority_analysis": true,
+      "trend_analysis": true,
+      "_metrics_description": "Enable/disable specific metric calculations"
+    }
+  },
+  
+  "reporting": {
+    "_comment": "Report generation and formatting options",
+    "html": {
+      "theme": "default",
+      "_theme_options": ["default", "dark", "light", "corporate"],
+      "_theme_description": "HTML report theme and styling",
+      
+      "include_charts": true,
+      "_charts_description": "Include interactive charts in HTML reports",
+      
+      "chart_format": "png",
+      "_chart_format_options": ["png", "svg", "base64"],
+      "_chart_format_description": "Format for embedded charts",
+      
+      "responsive_design": true,
+      "_responsive_description": "Enable responsive design for mobile devices"
+    },
+    
+    "csv": {
+      "delimiter": ",",
+      "_delimiter_description": "CSV field delimiter character",
+      
+      "include_headers": true,
+      "_headers_description": "Include column headers in CSV output"
+    },
+    
+    "json": {
+      "pretty_print": true,
+      "_pretty_description": "Format JSON output with indentation",
+      
+      "include_metadata": true,
+      "_metadata_description": "Include analysis metadata in JSON output"
+    }
+  },
+  
+  "logging": {
+    "_comment": "Logging configuration and security settings",
+    "level": "INFO",
+    "_level_options": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+    "_level_description": "Minimum logging level to output",
+    
+    "sanitize_logs": true,
+    "_sanitize_description": "Remove sensitive data from log messages",
+    
+    "log_file": "~/.ticket-analyzer/logs/app.log",
+    "_log_file_description": "Path to log file (use null to disable file logging)",
+    
+    "max_log_size_mb": 10,
+    "_max_size_description": "Maximum log file size before rotation (1-100 MB)",
+    
+    "backup_count": 5,
+    "_backup_description": "Number of rotated log files to keep (1-10)",
+    
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "_format_description": "Log message format string"
+  },
+  
+  "security": {
+    "_comment": "Security and data protection settings",
+    "strict_validation": true,
+    "_validation_description": "Enable strict input validation and sanitization",
+    
+    "pii_detection": true,
+    "_pii_description": "Automatically detect and remove personally identifiable information",
+    
+    "secure_temp_files": true,
+    "_temp_files_description": "Use secure permissions for temporary files",
+    
+    "memory_cleanup": true,
+    "_memory_description": "Securely clear sensitive data from memory after use"
+  },
+  
+  "performance": {
+    "_comment": "Performance optimization settings",
+    "parallel_processing": true,
+    "_parallel_description": "Enable parallel processing for large datasets",
+    
+    "max_workers": 4,
+    "_workers_description": "Maximum number of worker threads (1-8)",
+    
+    "memory_limit_mb": 1024,
+    "_memory_limit_description": "Maximum memory usage before switching to streaming mode (256-4096 MB)",
+    
+    "cache_enabled": true,
+    "_cache_description": "Enable caching of frequently accessed data",
+    
+    "cache_ttl_minutes": 15,
+    "_cache_ttl_description": "Cache time-to-live in minutes (5-60)"
+  },
+  
+  "filters": {
+    "_comment": "Default filters and search criteria",
+    "default_status": ["Open", "In Progress", "Resolved"],
+    "_status_description": "Default ticket statuses to include in analysis",
+    
+    "exclude_test_tickets": true,
+    "_test_tickets_description": "Automatically exclude tickets marked as test data",
+    
+    "min_priority": null,
+    "_min_priority_description": "Minimum priority level to include (null for all priorities)",
+    
+    "resolver_groups": [],
+    "_resolver_groups_description": "Default resolver groups to analyze (empty array for all groups)"
+  },
+  
+  "integrations": {
+    "_comment": "External system integration settings",
+    "mcp": {
+      "server_command": ["node", "mcp-server.js"],
+      "_server_description": "Command to start MCP server process",
+      
+      "connection_retries": 3,
+      "_connection_retries_description": "Number of connection retry attempts",
+      
+      "heartbeat_interval": 30,
+      "_heartbeat_description": "Heartbeat interval for connection health checks (seconds)"
+    },
+    
+    "notifications": {
+      "enabled": false,
+      "_notifications_description": "Enable notifications for completed analysis",
+      
+      "webhook_url": null,
+      "_webhook_description": "Webhook URL for sending notifications (null to disable)"
+    }
+  },
+  
+  "_usage_examples": {
+    "_comment": "This section contains usage examples and is ignored by the application",
+    "basic_analysis": "ticket-analyzer analyze --start-date 2024-01-01",
+    "team_report": "ticket-analyzer analyze --resolver-group 'My Team' --format html",
+    "json_export": "ticket-analyzer analyze --format json --output results.json",
+    "filtered_analysis": "ticket-analyzer analyze --status Open --assignee username"
+  },
+  
+  "_configuration_notes": {
+    "_comment": "Important notes about configuration",
+    "file_location": "Place this file at ~/.ticket-analyzer/config.json",
+    "environment_override": "Environment variables with TICKET_ANALYZER_ prefix override these settings",
+    "cli_override": "Command-line arguments have the highest priority",
+    "validation": "Invalid configuration values will fall back to defaults with warnings",
+    "security": "Never include credentials or sensitive data in configuration files"
+  }
+}

@@ -1,0 +1,257 @@
+# Ticket Analysis CLI Configuration Example (INI Format)
+# This is a comprehensive example configuration file showing all available options
+# Copy this file to ~/.ticket-analyzer/config.ini and modify according to your needs
+
+# =============================================================================
+# OUTPUT CONFIGURATION
+# Controls how results are displayed and formatted
+# =============================================================================
+[output]
+# Default output format when not specified via CLI
+# Options: table, json, csv, html
+default_format = table
+
+# Maximum number of tickets to retrieve in a single query (1-10000)
+max_results = 1000
+
+# Automatically remove PII and sensitive data from all outputs
+sanitize_output = true
+
+# Enable color coding in CLI output (disable for non-interactive use)
+color_output = true
+
+# Show progress bars during long-running operations
+progress_indicators = true
+
+# Default directory for saving report files (relative or absolute path)
+output_directory = ./reports
+
+# =============================================================================
+# AUTHENTICATION CONFIGURATION
+# Settings for Midway authentication and session management
+# =============================================================================
+[authentication]
+# Maximum time to wait for authentication operations (30-300 seconds)
+timeout_seconds = 60
+
+# Number of retry attempts for failed authentication (1-5)
+max_retry_attempts = 3
+
+# How often to verify authentication status (60-3600 seconds)
+check_interval_seconds = 300
+
+# Maximum authentication session duration (1-24 hours)
+session_duration_hours = 8
+
+# =============================================================================
+# DATA RETRIEVAL CONFIGURATION
+# Settings for MCP integration and data access
+# =============================================================================
+[data_retrieval]
+# Timeout for MCP connections (10-120 seconds)
+connection_timeout = 30
+
+# Timeout for data retrieval operations (30-300 seconds)
+read_timeout = 60
+
+# Number of retry attempts for failed data operations
+retry_attempts = 3
+
+# Number of tickets to process in each batch (50-500)
+batch_size = 100
+
+# Delay between API calls to respect rate limits (0.1-5.0 seconds)
+rate_limit_delay = 1.0
+
+# Circuit breaker failure threshold (number of failures before opening)
+circuit_breaker_failure_threshold = 5
+
+# Circuit breaker timeout in minutes (how long to keep open)
+circuit_breaker_timeout_minutes = 2
+
+# =============================================================================
+# ANALYSIS CONFIGURATION
+# Settings for metrics calculation and data analysis
+# =============================================================================
+[analysis]
+# Default number of days to analyze when no date range specified
+default_date_range_days = 30
+
+# Include weekends in business day calculations
+include_weekends = true
+
+# Business hours for resolution time calculations (24-hour format)
+business_hours_start = 09:00
+business_hours_end = 17:00
+
+# Timezone for date/time calculations (e.g., UTC, US/Pacific, US/Eastern)
+timezone = UTC
+
+# Enable/disable specific metric calculations
+metrics_resolution_time = true
+metrics_status_distribution = true
+metrics_assignee_workload = true
+metrics_priority_analysis = true
+metrics_trend_analysis = true
+
+# =============================================================================
+# REPORTING CONFIGURATION
+# Settings for report generation and formatting
+# =============================================================================
+[reporting_html]
+# HTML report theme and styling
+# Options: default, dark, light, corporate
+theme = default
+
+# Include interactive charts in HTML reports
+include_charts = true
+
+# Format for embedded charts
+# Options: png, svg, base64
+chart_format = png
+
+# Enable responsive design for mobile devices
+responsive_design = true
+
+[reporting_csv]
+# CSV field delimiter character
+delimiter = ,
+
+# Include column headers in CSV output
+include_headers = true
+
+[reporting_json]
+# Format JSON output with indentation
+pretty_print = true
+
+# Include analysis metadata in JSON output
+include_metadata = true
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# Settings for application logging and security
+# =============================================================================
+[logging]
+# Minimum logging level to output
+# Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+level = INFO
+
+# Remove sensitive data from log messages
+sanitize_logs = true
+
+# Path to log file (leave empty to disable file logging)
+log_file = ~/.ticket-analyzer/logs/app.log
+
+# Maximum log file size before rotation (1-100 MB)
+max_log_size_mb = 10
+
+# Number of rotated log files to keep (1-10)
+backup_count = 5
+
+# Log message format string
+format = %(asctime)s - %(name)s - %(levelname)s - %(message)s
+
+# =============================================================================
+# SECURITY CONFIGURATION
+# Settings for data protection and security measures
+# =============================================================================
+[security]
+# Enable strict input validation and sanitization
+strict_validation = true
+
+# Automatically detect and remove personally identifiable information
+pii_detection = true
+
+# Use secure permissions for temporary files
+secure_temp_files = true
+
+# Securely clear sensitive data from memory after use
+memory_cleanup = true
+
+# =============================================================================
+# PERFORMANCE CONFIGURATION
+# Settings for optimization and resource management
+# =============================================================================
+[performance]
+# Enable parallel processing for large datasets
+parallel_processing = true
+
+# Maximum number of worker threads (1-8)
+max_workers = 4
+
+# Maximum memory usage before switching to streaming mode (256-4096 MB)
+memory_limit_mb = 1024
+
+# Enable caching of frequently accessed data
+cache_enabled = true
+
+# Cache time-to-live in minutes (5-60)
+cache_ttl_minutes = 15
+
+# =============================================================================
+# FILTER CONFIGURATION
+# Default filters and search criteria
+# =============================================================================
+[filters]
+# Default ticket statuses to include in analysis (comma-separated)
+default_status = Open,In Progress,Resolved
+
+# Automatically exclude tickets marked as test data
+exclude_test_tickets = true
+
+# Minimum priority level to include (leave empty for all priorities)
+min_priority = 
+
+# Default resolver groups to analyze (comma-separated, empty for all groups)
+resolver_groups = 
+
+# =============================================================================
+# INTEGRATION CONFIGURATION
+# Settings for external system integrations
+# =============================================================================
+[integrations_mcp]
+# Command to start MCP server process (space-separated)
+server_command = node mcp-server.js
+
+# Number of connection retry attempts
+connection_retries = 3
+
+# Heartbeat interval for connection health checks (seconds)
+heartbeat_interval = 30
+
+[integrations_notifications]
+# Enable notifications for completed analysis
+enabled = false
+
+# Webhook URL for sending notifications (leave empty to disable)
+webhook_url = 
+
+# =============================================================================
+# USAGE EXAMPLES
+# These are example commands and are ignored by the application
+# =============================================================================
+# Basic analysis:
+#   ticket-analyzer analyze --start-date 2024-01-01
+#
+# Team report:
+#   ticket-analyzer analyze --resolver-group "My Team" --format html
+#
+# JSON export:
+#   ticket-analyzer analyze --format json --output results.json
+#
+# Filtered analysis:
+#   ticket-analyzer analyze --status Open --assignee username
+
+# =============================================================================
+# CONFIGURATION NOTES
+# =============================================================================
+# File Location: Place this file at ~/.ticket-analyzer/config.ini
+# Environment Override: Environment variables with TICKET_ANALYZER_ prefix override these settings
+# CLI Override: Command-line arguments have the highest priority
+# Validation: Invalid configuration values will fall back to defaults with warnings
+# Security: Never include credentials or sensitive data in configuration files
+# Comments: Lines starting with # are comments and are ignored
+# Sections: Configuration is organized into sections using [section_name]
+# Boolean Values: Use true/false (case-insensitive)
+# Lists: Use comma-separated values for list items
+# Paths: Use forward slashes or escaped backslashes for file paths

@@ -1,0 +1,109 @@
+{
+  "_comment": "Advanced Configuration Example - All available options configured",
+  "_description": "This configuration demonstrates all available settings with optimized values for production use. Suitable for teams processing large datasets with specific requirements.",
+  
+  "output": {
+    "default_format": "html",
+    "max_results": 5000,
+    "sanitize_output": true,
+    "color_output": true,
+    "progress_indicators": true,
+    "output_directory": "/shared/reports/ticket-analysis"
+  },
+  
+  "authentication": {
+    "timeout_seconds": 90,
+    "max_retry_attempts": 5,
+    "check_interval_seconds": 180,
+    "session_duration_hours": 12
+  },
+  
+  "data_retrieval": {
+    "connection_timeout": 45,
+    "read_timeout": 120,
+    "retry_attempts": 5,
+    "batch_size": 250,
+    "rate_limit_delay": 0.5,
+    "circuit_breaker": {
+      "failure_threshold": 10,
+      "timeout_minutes": 5
+    }
+  },
+  
+  "analysis": {
+    "default_date_range_days": 90,
+    "include_weekends": false,
+    "business_hours": {
+      "start": "08:00",
+      "end": "18:00"
+    },
+    "timezone": "US/Pacific",
+    "metrics": {
+      "resolution_time": true,
+      "status_distribution": true,
+      "assignee_workload": true,
+      "priority_analysis": true,
+      "trend_analysis": true
+    }
+  },
+  
+  "reporting": {
+    "html": {
+      "theme": "corporate",
+      "include_charts": true,
+      "chart_format": "svg",
+      "responsive_design": true
+    },
+    "csv": {
+      "delimiter": ",",
+      "include_headers": true
+    },
+    "json": {
+      "pretty_print": true,
+      "include_metadata": true
+    }
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "sanitize_logs": true,
+    "log_file": "/var/log/ticket-analyzer/app.log",
+    "max_log_size_mb": 50,
+    "backup_count": 10,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
+  },
+  
+  "security": {
+    "strict_validation": true,
+    "pii_detection": true,
+    "secure_temp_files": true,
+    "memory_cleanup": true
+  },
+  
+  "performance": {
+    "parallel_processing": true,
+    "max_workers": 8,
+    "memory_limit_mb": 4096,
+    "cache_enabled": true,
+    "cache_ttl_minutes": 30
+  },
+  
+  "filters": {
+    "default_status": ["Open", "In Progress", "Pending", "Resolved"],
+    "exclude_test_tickets": true,
+    "min_priority": null,
+    "resolver_groups": []
+  },
+  
+  "integrations": {
+    "mcp": {
+      "server_command": ["node", "--max-old-space-size=2048", "mcp-server.js"],
+      "connection_retries": 5,
+      "heartbeat_interval": 15
+    },
+    "notifications": {
+      "enabled": true,
+      "webhook_url": "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+    }
+  }
+}

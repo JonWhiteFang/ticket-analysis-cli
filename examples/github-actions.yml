@@ -1,0 +1,349 @@
+# GitHub Actions Workflow for Ticket Analysis CLI
+# This workflow demonstrates automated ticket analysis in GitHub Actions
+
+name: Ticket Analysis Report
+
+on:
+  # Scheduled runs
+  schedule:
+    - cron: '0 8 * * 1'  # Every Monday at 8 AM UTC
+    - cron: '0 8 1 * *'  # First day of every month at 8 AM UTC
+  
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      team_name:
+        description: 'Team resolver group name'
+        required: false
+        default: ''
+        type: string
+      analysis_period:
+        description: 'Analysis time period'
+        required: true
+        default: 'monthly'
+        type: choice
+        options:
+          - weekly
+          - monthly
+          - quarterly
+      output_format:
+        description: 'Report output format'
+        required: true
+        default: 'html'
+        type: choice
+        options:
+          - html
+          - json
+          - csv
+      email_report:
+        description: 'Email report to team leads'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  REPORTS_DIR: ./reports
+  PYTHON_VERSION: '3.7'
+  NODE_VERSION: '16'
+
+jobs:
+  ticket-analysis:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+    
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install ticket-analyzer CLI
+      run: |
+        echo "Installing ticket-analyzer CLI..."
+        # In real implementation, install from package manager or build from source
+        pip install -r requirements.txt
+        
+        # Verify installation
+        ticket-analyzer --version || echo "CLI installation verification failed"
+    
+    - name: Create configuration
+      run: |
+        mkdir -p ~/.ticket-analyzer
+        cat > ~/.ticket-analyzer/config.json << 'EOF'
+        {
+          "output": {
+            "default_format": "html",
+            "max_results": 5000,
+            "sanitize_output": true,
+            "progress_indicators": true
+          },
+          "authentication": {
+            "timeout_seconds": 90,
+            "max_retry_attempts": 5
+          },
+          "logging": {
+            "level": "INFO",
+            "sanitize_logs": true
+          },
+          "performance": {
+            "parallel_processing": true,
+            "max_workers": 2
+          },
+          "security": {
+            "strict_validation": true,
+            "pii_detection": true
+          }
+        }
+        EOF
+        
+        echo "Configuration created at ~/.ticket-analyzer/config.json"
+    
+    - name: Setup authentication
+      env:
+        MIDWAY_USERNAME: ${{ secrets.MIDWAY_USERNAME }}
+        MIDWAY_PASSWORD: ${{ secrets.MIDWAY_PASSWORD }}
+      run: |
+        echo "Setting up authentication..."
+        
+        # Note: In real implementation, use proper service account authentication
+        # This is a simplified example for demonstration
+        
+        # Check if mwinit is available (it won't be in GitHub Actions)
+        if command -v mwinit &> /dev/null; then
+          echo "Authenticating with Midway..."
+          # mwinit authentication would go here
+        else
+          echo "⚠️ mwinit not available in GitHub Actions environment"
+          echo "In production, set up service account authentication"
+        fi
+    
+    - name: Calculate date range
+      id: dates
+      run: |
+        # Determine analysis period
+        PERIOD="${{ github.event.inputs.analysis_period || 'monthly' }}"
+        
+        case $PERIOD in
+          weekly)
+            DAYS=7
+            ;;
+          monthly)
+            DAYS=30
+            ;;
+          quarterly)
+            DAYS=90
+            ;;
+          *)
+            DAYS=30
+            ;;
+        esac
+        
+        # Calculate dates
+        END_DATE=$(date +%Y-%m-%d)
+        START_DATE=$(date -d "$DAYS days ago" +%Y-%m-%d)
+        
+        echo "start_date=$START_DATE" >> $GITHUB_OUTPUT
+        echo "end_date=$END_DATE" >> $GITHUB_OUTPUT
+        echo "period=$PERIOD" >> $GITHUB_OUTPUT
+        echo "days=$DAYS" >> $GITHUB_OUTPUT
+        
+        echo "📅 Analysis period: $START_DATE to $END_DATE ($DAYS days)"
+    
+    - name: Create reports directory
+      run: |
+        mkdir -p ${{ env.REPORTS_DIR }}
+        echo "Reports directory created: ${{ env.REPORTS_DIR }}"
+    
+    - name: Run ticket analysis
+      id: analysis
+      env:
+        TEAM_NAME: ${{ github.event.inputs.team_name }}
+        OUTPUT_FORMAT: ${{ github.event.inputs.output_format || 'html' }}
+        START_DATE: ${{ steps.dates.outputs.start_date }}
+        END_DATE: ${{ steps.dates.outputs.end_date }}
+        PERIOD: ${{ steps.dates.outputs.period }}
+      run: |
+        echo "🎫 Running ticket analysis..."
+        echo "Team: ${TEAM_NAME:-'All teams'}"
+        echo "Period: $PERIOD ($START_DATE to $END_DATE)"
+        echo "Format: $OUTPUT_FORMAT"
+        
+        # Generate timestamp and safe team name
+        TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+        SAFE_TEAM=$(echo "${TEAM_NAME:-all_teams}" | tr ' ' '_' | tr -cd '[:alnum:]_-')
+        OUTPUT_FILE="${{ env.REPORTS_DIR }}/${PERIOD}_${SAFE_TEAM}_${TIMESTAMP}.${OUTPUT_FORMAT}"
+        
+        # Build command
+        CMD="ticket-analyzer analyze"
+        CMD="$CMD --start-date $START_DATE"
+        CMD="$CMD --end-date $END_DATE"
+        CMD="$CMD --format $OUTPUT_FORMAT"
+        CMD="$CMD --output $OUTPUT_FILE"
+        CMD="$CMD --progress"
+        CMD="$CMD --verbose"
+        
+        if [ -n "$TEAM_NAME" ]; then
+          CMD="$CMD --resolver-group \"$TEAM_NAME\""
+        fi
+        
+        echo "Command: $CMD"
+        
+        # Execute analysis (with error handling for demo)
+        if eval "$CMD"; then
+          echo "✅ Analysis completed successfully"
+          echo "output_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+          echo "success=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Analysis failed"
+          echo "success=false" >> $GITHUB_OUTPUT
+          
+          # Create a dummy report for demo purposes
+          echo "Analysis failed - this is a demo report" > "$OUTPUT_FILE"
+          echo "output_file=$OUTPUT_FILE" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Validate report
+      if: steps.analysis.outputs.success == 'true'
+      run: |
+        OUTPUT_FILE="${{ steps.analysis.outputs.output_file }}"
+        
+        if [ -f "$OUTPUT_FILE" ]; then
+          FILE_SIZE=$(stat -c%s "$OUTPUT_FILE" 2>/dev/null || stat -f%z "$OUTPUT_FILE" 2>/dev/null || echo "0")
+          echo "📊 Report file size: $FILE_SIZE bytes"
+          
+          if [ "$FILE_SIZE" -gt 100 ]; then
+            echo "✅ Report validation passed"
+          else
+            echo "⚠️ Report file is very small, may indicate an issue"
+          fi
+        else
+          echo "❌ Report file not found: $OUTPUT_FILE"
+          exit 1
+        fi
+    
+    - name: Upload report artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ticket-analysis-reports
+        path: ${{ env.REPORTS_DIR }}/*
+        retention-days: 30
+    
+    - name: Generate summary
+      id: summary
+      run: |
+        OUTPUT_FILE="${{ steps.analysis.outputs.output_file }}"
+        TEAM_NAME="${{ github.event.inputs.team_name }}"
+        PERIOD="${{ steps.dates.outputs.period }}"
+        START_DATE="${{ steps.dates.outputs.start_date }}"
+        END_DATE="${{ steps.dates.outputs.end_date }}"
+        
+        # Create summary
+        SUMMARY="## 🎫 Ticket Analysis Report
+        
+        **Analysis Details:**
+        - 👥 Team: ${TEAM_NAME:-'All teams'}
+        - 📅 Period: ${PERIOD} (${START_DATE} to ${END_DATE})
+        - 📊 Format: ${{ github.event.inputs.output_format || 'html' }}
+        - 🕐 Generated: $(date)
+        - 🔗 Workflow: [${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+        
+        **Report Status:** ${{ steps.analysis.outputs.success == 'true' && '✅ Success' || '❌ Failed' }}
+        
+        **Files Generated:**"
+        
+        if [ -f "$OUTPUT_FILE" ]; then
+          FILENAME=$(basename "$OUTPUT_FILE")
+          FILE_SIZE=$(stat -c%s "$OUTPUT_FILE" 2>/dev/null || stat -f%z "$OUTPUT_FILE" 2>/dev/null || echo "0")
+          SUMMARY="$SUMMARY
+        - 📄 \`$FILENAME\` (${FILE_SIZE} bytes)"
+        fi
+        
+        # Save summary to file and output
+        echo "$SUMMARY" > ${{ env.REPORTS_DIR }}/summary.md
+        echo "summary<<EOF" >> $GITHUB_OUTPUT
+        echo "$SUMMARY" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Comment on PR (if applicable)
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `${{ steps.summary.outputs.summary }}`
+          })
+    
+    - name: Create GitHub release (for scheduled runs)
+      if: github.event_name == 'schedule' && steps.analysis.outputs.success == 'true'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: report-${{ steps.dates.outputs.period }}-${{ github.run_number }}
+        release_name: Ticket Analysis Report - ${{ steps.dates.outputs.period }}
+        body: ${{ steps.summary.outputs.summary }}
+        draft: false
+        prerelease: false
+    
+    - name: Send email notification
+      if: github.event.inputs.email_report == 'true' && steps.analysis.outputs.success == 'true'
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.company.com
+        server_port: 587
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: "Ticket Analysis Report - ${{ steps.dates.outputs.period }}"
+        to: ${{ secrets.TEAM_LEADS_EMAIL }}
+        from: "GitHub Actions <noreply@company.com>"
+        body: |
+          ${{ steps.summary.outputs.summary }}
+          
+          The full report is available in the GitHub Actions artifacts:
+          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        attachments: ${{ steps.analysis.outputs.output_file }}
+    
+    - name: Slack notification
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#team-reports'
+        text: |
+          Ticket Analysis Report ${{ steps.analysis.outputs.success == 'true' && 'completed successfully' || 'failed' }}
+          Team: ${{ github.event.inputs.team_name || 'All teams' }}
+          Period: ${{ steps.dates.outputs.period }}
+          Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    
+    - name: Cleanup
+      if: always()
+      run: |
+        echo "🧹 Cleaning up temporary files..."
+        
+        # Remove sensitive configuration
+        rm -f ~/.ticket-analyzer/config.json
+        
+        # Keep reports for artifact upload
+        echo "Reports preserved in ${{ env.REPORTS_DIR }}"
+        
+        echo "✅ Cleanup completed"

@@ -1,0 +1,119 @@
+{
+  "_comment": "Development Environment Configuration",
+  "_description": "Configuration optimized for development and testing environments with enhanced debugging and relaxed security for local development.",
+  
+  "output": {
+    "default_format": "json",
+    "max_results": 50,
+    "sanitize_output": false,
+    "color_output": true,
+    "progress_indicators": true,
+    "output_directory": "./dev-reports"
+  },
+  
+  "authentication": {
+    "timeout_seconds": 30,
+    "max_retry_attempts": 2,
+    "check_interval_seconds": 600,
+    "session_duration_hours": 4
+  },
+  
+  "data_retrieval": {
+    "connection_timeout": 15,
+    "read_timeout": 30,
+    "retry_attempts": 2,
+    "batch_size": 25,
+    "rate_limit_delay": 0.1,
+    "circuit_breaker": {
+      "failure_threshold": 3,
+      "timeout_minutes": 1
+    }
+  },
+  
+  "analysis": {
+    "default_date_range_days": 7,
+    "include_weekends": true,
+    "business_hours": {
+      "start": "09:00",
+      "end": "17:00"
+    },
+    "timezone": "UTC",
+    "metrics": {
+      "resolution_time": true,
+      "status_distribution": true,
+      "assignee_workload": false,
+      "priority_analysis": true,
+      "trend_analysis": false
+    }
+  },
+  
+  "reporting": {
+    "html": {
+      "theme": "light",
+      "include_charts": true,
+      "chart_format": "png",
+      "responsive_design": true
+    },
+    "json": {
+      "pretty_print": true,
+      "include_metadata": true
+    }
+  },
+  
+  "logging": {
+    "level": "DEBUG",
+    "sanitize_logs": false,
+    "log_file": "./dev-logs/app.log",
+    "max_log_size_mb": 5,
+    "backup_count": 3,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
+  },
+  
+  "security": {
+    "strict_validation": false,
+    "pii_detection": false,
+    "secure_temp_files": false,
+    "memory_cleanup": false
+  },
+  
+  "performance": {
+    "parallel_processing": false,
+    "max_workers": 1,
+    "memory_limit_mb": 512,
+    "cache_enabled": false,
+    "cache_ttl_minutes": 5
+  },
+  
+  "filters": {
+    "default_status": ["Open", "In Progress"],
+    "exclude_test_tickets": false,
+    "min_priority": null,
+    "resolver_groups": []
+  },
+  
+  "integrations": {
+    "mcp": {
+      "server_command": ["node", "--inspect", "mcp-server.js"],
+      "connection_retries": 2,
+      "heartbeat_interval": 60
+    },
+    "notifications": {
+      "enabled": false,
+      "webhook_url": null
+    }
+  },
+  
+  "_development_notes": {
+    "purpose": "This configuration is optimized for development and testing",
+    "security_relaxed": "Security features are disabled for easier debugging",
+    "performance_reduced": "Performance settings are reduced for faster iteration",
+    "logging_verbose": "Debug logging is enabled for troubleshooting",
+    "data_limits": "Smaller data limits for faster testing cycles"
+  },
+  
+  "_usage_examples": {
+    "quick_test": "ticket-analyzer analyze --config dev-config.json --max-results 10",
+    "debug_mode": "ticket-analyzer analyze --config dev-config.json --verbose",
+    "local_team": "ticket-analyzer analyze --config dev-config.json --resolver-group 'Test Team'"
+  }
+}
