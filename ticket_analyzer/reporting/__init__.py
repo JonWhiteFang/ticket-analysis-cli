@@ -2,12 +2,27 @@
 
 This module provides comprehensive reporting capabilities including:
 - CLI reporting with color coding and tabular formatting
+- HTML reporting with Jinja2 templates and embedded charts
+- Chart generation with matplotlib and seaborn
+- Theme management and customization
 - Advanced table formatters with responsive layouts
 - Progress indicators and user feedback management
 - Multiple output formats and presentation styles
 """
 
 from .cli_reporter import CLIReporter, CLIColorScheme, CLITableFormatter
+from .html_reporter import HTMLReporter
+from .charts import ChartGenerator
+from .themes import (
+    ThemeManager, 
+    Theme, 
+    ColorPalette, 
+    LayoutConfig, 
+    BrandingConfig,
+    ThemeType,
+    ColorScheme as ThemeColorScheme,
+    ReportCustomizer
+)
 from .formatters import (
     TableFormatter, 
     ColorScheme, 
@@ -29,6 +44,22 @@ __all__ = [
     'CLIReporter',
     'CLIColorScheme', 
     'CLITableFormatter',
+    
+    # HTML Reporter
+    'HTMLReporter',
+    
+    # Charts
+    'ChartGenerator',
+    
+    # Themes
+    'ThemeManager',
+    'Theme',
+    'ColorPalette',
+    'LayoutConfig',
+    'BrandingConfig',
+    'ThemeType',
+    'ThemeColorScheme',
+    'ReportCustomizer',
     
     # Formatters
     'TableFormatter',

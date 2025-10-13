@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Summary Report</title>
+    
+    <style>
+        /* Inherit base styles from main template but with summary-specific optimizations */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --background-color: #ffffff;
+            --surface-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #ecf0f1;
+            --background-color: #2c3e50;
+            --surface-color: #34495e;
+            --text-color: #ecf0f1;
+            --text-muted: #bdc3c7;
+            --border-color: #4a5568;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-card {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insights {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .insights h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .insight-item {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .status-overview {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: var(--warning-color); color: white; }
+        .status-resolved { background: var(--success-color); color: white; }
+        .status-closed { background: var(--text-muted); color: white; }
+        .status-in-progress { background: var(--secondary-color); color: white; }
+
+        .footer {
+            text-align: center;
+            color: var(--text-muted);
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        @media (max-width: 600px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metric-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body data-theme="{{ theme if theme != 'auto' else 'light' }}">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{ title }}</h1>
+            <div class="subtitle">Executive Summary</div>
+            <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                {{ generated_at.strftime('%B %d, %Y') }}
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="summary-grid">
+            <div class="metric-card">
+                <div class="metric-value">{{ ticket_count | format_number }}</div>
+                <div class="metric-label">Total Tickets</div>
+            </div>
+            
+            {% if metrics.total_resolved %}
+            <div class="metric-card">
+                <div class="metric-value">{{ metrics.total_resolved | format_number }}</div>
+                <div class="metric-label">Resolved</div>
+            </div>
+            {% endif %}
+            
+            {% if metrics.avg_resolution_time_hours %}
+            <div class="metric-card">
+                <div class="metric-value">{{ (metrics.avg_resolution_time_hours / 24) | round(1) }}</div>
+                <div class="metric-label">Avg Days to Resolve</div>
+            </div>
+            {% endif %}
+            
+            {% if metrics.status_counts %}
+            <div class="metric-card">
+                <div class="metric-value">{{ metrics.status_counts.get('Open', 0) | format_number }}</div>
+                <div class="metric-label">Open Tickets</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Key Insights -->
+        {% if summary %}
+        <div class="insights">
+            <h2>Key Insights</h2>
+            {% for key, value in summary.items() %}
+            <div class="insight-item">
+                <strong>{{ key.replace('_', ' ').title() }}:</strong> {{ value }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Status Overview -->
+        {% if metrics.status_counts %}
+        <div class="status-overview">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Status Distribution</h2>
+            {% for status, count in metrics.status_counts.items() %}
+            <div class="status-item">
+                <div>
+                    <span class="status-badge status-{{ status.lower().replace(' ', '-') }}">{{ status }}</span>
+                </div>
+                <div>
+                    <strong>{{ count | format_number }}</strong>
+                    {% if metrics.status_percentages and status in metrics.status_percentages %}
+                    <span style="color: var(--text-muted); margin-left: 0.5rem;">
+                        ({{ metrics.status_percentages[status] | round(1) }}%)
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Generated by Ticket Analysis CLI</p>
+            {% if date_range %}
+            <p>Analysis Period: {{ date_range[0] }} to {{ date_range[1] }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect theme
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('{{ theme }}' === 'auto') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        });
+    </script>
+</body>
+</html>

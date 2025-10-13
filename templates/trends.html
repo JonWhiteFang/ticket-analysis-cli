@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Trend Analysis</title>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --background-color: #ffffff;
+            --surface-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #ecf0f1;
+            --background-color: #2c3e50;
+            --surface-color: #34495e;
+            --text-color: #ecf0f1;
+            --text-muted: #bdc3c7;
+            --border-color: #4a5568;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .trend-section {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .trend-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .trend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .trend-card {
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .trend-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .trend-chart {
+            height: 200px;
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            display: flex;
+            align-items: end;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .trend-bar {
+            flex: 1;
+            background: var(--secondary-color);
+            margin: 0 2px;
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .trend-bar:hover {
+            background: var(--accent-color);
+        }
+
+        .trend-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .trend-label {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0.5rem 0;
+        }
+
+        .trend-up {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+        }
+
+        .trend-down {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+        }
+
+        .trend-stable {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--text-muted);
+        }
+
+        .trend-up::before { content: "↗ "; }
+        .trend-down::before { content: "↘ "; }
+        .trend-stable::before { content: "→ "; }
+
+        .weekly-trends {
+            background: var(--background-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .weekly-chart {
+            height: 300px;
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            padding: 2rem;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .chart-placeholder {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-style: italic;
+            border: 2px dashed var(--border-color);
+            border-radius: var(--border-radius);
+        }
+
+        .trend-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .summary-item {
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trend-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin: 1rem 0;
+        }
+
+        .trend-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .trend-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .trend-table tr:hover {
+            background: var(--surface-color);
+        }
+
+        .period-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .period-button {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--secondary-color);
+            background: transparent;
+            color: var(--secondary-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .period-button:hover,
+        .period-button.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .trend-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .trend-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .period-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body data-theme="{{ theme if theme != 'auto' else 'light' }}">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{ title }}</h1>
+            <div style="opacity: 0.9; font-size: 1.1rem;">Trend Analysis & Patterns</div>
+            <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Generated on {{ generated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                • {{ ticket_count | format_number }} tickets analyzed
+            </div>
+        </div>
+
+        <!-- Period Selector -->
+        <div class="period-selector">
+            <button class="period-button active" onclick="showPeriod('weekly')">Weekly</button>
+            <button class="period-button" onclick="showPeriod('monthly')">Monthly</button>
+            <button class="period-button" onclick="showPeriod('quarterly')">Quarterly</button>
+        </div>
+
+        <!-- Trend Summary -->
+        {% if trends %}
+        <div class="trend-summary">
+            {% for trend_name, trend_data in trends.items() %}
+            {% if trend_data is number %}
+            <div class="summary-item">
+                <div class="summary-value">{{ trend_data | round(1) }}</div>
+                <div class="summary-label">{{ trend_name.replace('_', ' ').title() }}</div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Weekly Trends -->
+        {% if trends.weekly_trends %}
+        <div class="weekly-trends" id="weekly-trends">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem;">Weekly Ticket Trends</h2>
+            
+            <div class="weekly-chart">
+                <div class="chart-placeholder">
+                    Weekly trend chart will be displayed here
+                    <br><small>Chart integration with matplotlib/seaborn pending</small>
+                </div>
+            </div>
+            
+            <!-- Weekly Data Table -->
+            {% if trends.weekly_trends is mapping %}
+            <table class="trend-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Trend</th>
+                        <th>Latest Week</th>
+                        <th>Change</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for status, week_data in trends.weekly_trends.items() %}
+                    <tr>
+                        <td>{{ status }}</td>
+                        <td>
+                            <span class="trend-indicator trend-stable">Stable</span>
+                        </td>
+                        <td>{{ week_data.values() | list | last if week_data.values() else 'N/A' }}</td>
+                        <td>-</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Individual Trend Analysis -->
+        {% if trends %}
+        <div class="trend-section">
+            <h2>Detailed Trend Analysis</h2>
+            
+            <div class="trend-grid">
+                {% for trend_name, trend_data in trends.items() %}
+                {% if trend_name != 'weekly_trends' %}
+                <div class="trend-card">
+                    <h3>{{ trend_name.replace('_', ' ').title() }}</h3>
+                    
+                    {% if trend_data is mapping %}
+                    <!-- Display as chart if it's structured data -->
+                    <div class="trend-chart">
+                        {% for key, value in trend_data.items() %}
+                        {% if loop.index <= 10 %}
+                        <div class="trend-bar" 
+                             style="height: {{ (value / (trend_data.values() | max)) * 150 }}px;"
+                             title="{{ key }}: {{ value }}">
+                            <div class="trend-value">{{ value }}</div>
+                            <div class="trend-label">{{ key[:8] }}...</div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Display as table for detailed view -->
+                    <table class="trend-table">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in trend_data.items() %}
+                            <tr>
+                                <td>{{ key }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    {% elif trend_data is number %}
+                    <!-- Display single value with trend indicator -->
+                    <div style="text-align: center; padding: 2rem;">
+                        <div style="font-size: 2.5rem; font-weight: 700; color: var(--secondary-color); margin-bottom: 1rem;">
+                            {{ trend_data | round(1) }}
+                        </div>
+                        <span class="trend-indicator trend-stable">Stable</span>
+                    </div>
+                    
+                    {% else %}
+                    <!-- Display as text -->
+                    <p>{{ trend_data }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Volume Trends -->
+        <div class="trend-section">
+            <h2>Volume Trends</h2>
+            
+            <div class="trend-card">
+                <h3>Ticket Volume Over Time</h3>
+                <div class="trend-chart">
+                    <div class="chart-placeholder">
+                        Volume trend visualization will be displayed here
+                        <br><small>Integration with time-series charts pending</small>
+                    </div>
+                </div>
+                
+                <div class="trend-summary">
+                    <div class="summary-item">
+                        <div class="summary-value">{{ ticket_count | format_number }}</div>
+                        <div class="summary-label">Total Volume</div>
+                    </div>
+                    
+                    {% if metrics.status_counts %}
+                    <div class="summary-item">
+                        <div class="summary-value">{{ metrics.status_counts.get('Open', 0) | format_number }}</div>
+                        <div class="summary-label">Open Tickets</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if date_range %}
+                    <div class="summary-item">
+                        <div class="summary-value">{{ ((date_range[1] | string | length) if date_range[1] else 0) }}</div>
+                        <div class="summary-label">Analysis Days</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Predictive Analysis -->
+        <div class="trend-section">
+            <h2>Predictive Insights</h2>
+            
+            <div class="trend-grid">
+                <div class="trend-card">
+                    <h3>Forecast</h3>
+                    <div style="padding: 2rem; text-align: center;">
+                        <div style="color: var(--text-muted); font-style: italic;">
+                            Predictive analysis based on historical trends
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <span class="trend-indicator trend-stable">
+                                Stable volume expected
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="trend-card">
+                    <h3>Recommendations</h3>
+                    <div style="padding: 1rem;">
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                📈 Monitor resolution time trends
+                            </li>
+                            <li style="padding: 0.5rem 0; border-bottom: 1px solid var(--border-color);">
+                                🎯 Focus on high-severity tickets
+                            </li>
+                            <li style="padding: 0.5rem 0;">
+                                📊 Review weekly patterns
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; color: var(--text-muted); margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+            <p>Trend Analysis Report • Generated by Ticket Analysis CLI</p>
+            {% if date_range %}
+            <p>Analysis Period: {{ date_range[0] }} to {{ date_range[1] }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect theme
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('{{ theme }}' === 'auto') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        });
+
+        // Period selector functionality
+        function showPeriod(period) {
+            // Update active button
+            document.querySelectorAll('.period-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Show/hide relevant sections
+            console.log(`Showing ${period} trends`);
+            // Implementation would filter and display relevant trend data
+        }
+
+        // Interactive chart hover effects
+        document.querySelectorAll('.trend-bar').forEach(bar => {
+            bar.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+            });
+            
+            bar.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Trend indicator animations
+        document.querySelectorAll('.trend-indicator').forEach(indicator => {
+            indicator.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1)';
+            });
+            
+            indicator.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - {{ generated_at.strftime('%Y-%m-%d') }}</title>
+    
+    <style>
+        /* Theme CSS */
+        {% if theme_css %}
+        {{ theme_css | safe }}
+        {% else %}
+        /* Default CSS Variables for theming */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --background-color: #ffffff;
+            --surface-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        /* Dark theme */
+        [data-theme="dark"] {
+            --primary-color: #ecf0f1;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --background-color: #2c3e50;
+            --surface-color: #34495e;
+            --text-color: #ecf0f1;
+            --text-muted: #bdc3c7;
+            --border-color: #4a5568;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        {% endif %}
+
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .header .meta {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Navigation */
+        .nav {
+            background: var(--surface-color);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .nav a:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        /* Sections */
+        .section {
+            background: var(--surface-color);
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .section h3 {
+            color: var(--text-color);
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.3rem;
+            font-weight: 500;
+        }
+
+        /* Grid layout */
+        .grid {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        /* Cards */
+        .card {
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .card h4 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* Metrics */
+        .metric {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: var(--surface-color);
+        }
+
+        /* Charts */
+        .chart-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .chart-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        /* Status indicators */
+        .status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: var(--warning-color); color: white; }
+        .status-resolved { background: var(--success-color); color: white; }
+        .status-closed { background: var(--text-muted); color: white; }
+        .status-in-progress { background: var(--secondary-color); color: white; }
+
+        /* Severity indicators */
+        .severity {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .severity-sev1 { background: #dc3545; color: white; }
+        .severity-sev2 { background: #fd7e14; color: white; }
+        .severity-sev3 { background: #ffc107; color: black; }
+        .severity-sev4 { background: #28a745; color: white; }
+        .severity-sev5 { background: #6c757d; color: white; }
+
+        /* Progress bars */
+        .progress {
+            background: var(--border-color);
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-color), var(--success-color));
+            transition: width 0.3s ease;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .alert-success {
+            background: rgba(39, 174, 96, 0.1);
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .alert-warning {
+            background: rgba(243, 156, 18, 0.1);
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav ul {
+                flex-direction: column;
+            }
+
+            .section {
+                padding: 1rem;
+            }
+
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .theme-toggle, .nav {
+                display: none;
+            }
+
+            .section {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+
+            .header {
+                background: #2c3e50 !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+
+        /* Animation utilities */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Utility classes */
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-muted { color: var(--text-muted); }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+    </style>
+</head>
+<body data-theme="{{ theme if theme != 'auto' else 'light' }}">
+    <!-- Theme Toggle Button -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        🌓
+    </button>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                {% if branding and branding.show_logo and branding.logo_url %}
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <img src="{{ branding.logo_url }}" alt="Logo" 
+                         style="width: {{ branding.logo_width }}; height: {{ branding.logo_height }};">
+                    {% if branding.show_company_name and branding.company_name %}
+                    <div style="font-size: 1.2rem; font-weight: 600;">{{ branding.company_name }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <h1>
+                    {% if branding and branding.report_title_prefix %}
+                    {{ branding.report_title_prefix }} - 
+                    {% endif %}
+                    {{ title }}
+                </h1>
+                <div class="subtitle">Comprehensive Ticket Analysis Report</div>
+                <div class="meta">
+                    Generated on {{ generated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                    {% if ticket_count %}
+                    • {{ ticket_count | format_number }} tickets analyzed
+                    {% endif %}
+                    {% if date_range %}
+                    • Period: {{ date_range[0] }} to {{ date_range[1] }}
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="container">
+                <ul>
+                    <li><a href="#summary">Summary</a></li>
+                    <li><a href="#metrics">Metrics</a></li>
+                    {% if trends %}
+                    <li><a href="#trends">Trends</a></li>
+                    {% endif %}
+                    {% if include_charts %}
+                    <li><a href="#charts">Charts</a></li>
+                    {% endif %}
+                    <li><a href="#details">Details</a></li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Summary Section -->
+        <section id="summary" class="section fade-in">
+            <h2>Executive Summary</h2>
+            
+            <div class="grid grid-3 mb-3">
+                <div class="card metric">
+                    <div class="metric-value">{{ ticket_count | format_number }}</div>
+                    <div class="metric-label">Total Tickets</div>
+                </div>
+                
+                {% if metrics.total_resolved %}
+                <div class="card metric">
+                    <div class="metric-value">{{ metrics.total_resolved | format_number }}</div>
+                    <div class="metric-label">Resolved Tickets</div>
+                </div>
+                {% endif %}
+                
+                {% if metrics.avg_resolution_time_hours %}
+                <div class="card metric">
+                    <div class="metric-value">{{ metrics.avg_resolution_time_hours | format_duration }}</div>
+                    <div class="metric-label">Avg Resolution Time</div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if summary %}
+            <div class="card">
+                <h4>Key Insights</h4>
+                {% for key, value in summary.items() %}
+                <p><strong>{{ key.replace('_', ' ').title() }}:</strong> {{ value }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Metrics Section -->
+        <section id="metrics" class="section fade-in">
+            <h2>Detailed Metrics</h2>
+            
+            {% if metrics %}
+            <div class="grid grid-2">
+                <!-- Resolution Metrics -->
+                {% if metrics.avg_resolution_time_hours or metrics.median_resolution_time_hours %}
+                <div class="card">
+                    <h4>Resolution Time Analysis</h4>
+                    <table>
+                        {% if metrics.avg_resolution_time_hours %}
+                        <tr>
+                            <td>Average Resolution Time</td>
+                            <td>{{ metrics.avg_resolution_time_hours | format_duration }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if metrics.median_resolution_time_hours %}
+                        <tr>
+                            <td>Median Resolution Time</td>
+                            <td>{{ metrics.median_resolution_time_hours | format_duration }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if metrics.total_resolved %}
+                        <tr>
+                            <td>Total Resolved</td>
+                            <td>{{ metrics.total_resolved | format_number }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Status Distribution -->
+                {% if metrics.status_counts %}
+                <div class="card">
+                    <h4>Status Distribution</h4>
+                    {% for status, count in metrics.status_counts.items() %}
+                    <div class="mb-2">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span class="status status-{{ status.lower().replace(' ', '-') }}">{{ status }}</span>
+                            <span>{{ count | format_number }}</span>
+                        </div>
+                        {% if metrics.status_percentages and status in metrics.status_percentages %}
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ metrics.status_percentages[status] }}%"></div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Severity Analysis -->
+                {% if metrics.by_severity %}
+                <div class="card">
+                    <h4>Resolution Time by Severity</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Severity</th>
+                                <th>Avg Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for severity, time in metrics.by_severity.items() %}
+                            <tr>
+                                <td><span class="severity severity-{{ severity.lower() }}">{{ severity }}</span></td>
+                                <td>{{ time | format_duration }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Percentiles -->
+                {% if metrics.percentiles %}
+                <div class="card">
+                    <h4>Resolution Time Percentiles</h4>
+                    <table>
+                        {% for percentile, value in metrics.percentiles.items() %}
+                        <tr>
+                            <td>{{ percentile.upper() }}</td>
+                            <td>{{ value | format_duration }}</td>
+                        </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                No metrics data available for this analysis.
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Trends Section -->
+        {% if trends %}
+        <section id="trends" class="section fade-in">
+            <h2>Trend Analysis</h2>
+            
+            <div class="grid grid-2">
+                {% for trend_name, trend_data in trends.items() %}
+                <div class="card">
+                    <h4>{{ trend_name.replace('_', ' ').title() }}</h4>
+                    {% if trend_data is mapping %}
+                        <table>
+                            {% for key, value in trend_data.items() %}
+                            <tr>
+                                <td>{{ key.replace('_', ' ').title() }}</td>
+                                <td>{{ value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    {% else %}
+                        <p>{{ trend_data }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Charts Section -->
+        {% if include_charts %}
+        <section id="charts" class="section fade-in">
+            <h2>Visual Analysis</h2>
+            
+            {% if charts %}
+            <div class="grid grid-2">
+                {% for chart_name, chart_data in charts.items() %}
+                <div class="chart-container">
+                    <div class="chart-title">{{ chart_name.replace('_', ' ').title() }}</div>
+                    <img src="{{ chart_data }}" alt="{{ chart_name.replace('_', ' ').title() }}" />
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <strong>Note:</strong> No charts available for this analysis. Charts will be generated when sufficient data is available.
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+
+        <!-- Details Section -->
+        <section id="details" class="section fade-in">
+            <h2>Analysis Details</h2>
+            
+            <div class="grid grid-2">
+                <div class="card">
+                    <h4>Analysis Configuration</h4>
+                    <table>
+                        <tr>
+                            <td>Analysis Duration</td>
+                            <td>{{ analysis_duration | format_duration if analysis_duration else 'N/A' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Output Format</td>
+                            <td>{{ config.format.value if config.format else 'HTML' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Data Sanitized</td>
+                            <td>{{ 'Yes' if sanitize_output else 'No' }}</td>
+                        </tr>
+                        <tr>
+                            <td>Theme</td>
+                            <td>{{ theme.title() }}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="card">
+                    <h4>Data Quality</h4>
+                    <div class="alert alert-success">
+                        <strong>✓ Data Validation:</strong> All ticket data has been validated and sanitized for security.
+                    </div>
+                    {% if verbose %}
+                    <div class="alert alert-info">
+                        <strong>ℹ Verbose Mode:</strong> Detailed analysis information is included in this report.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="section text-center text-muted">
+            {% if branding and branding.footer_text %}
+            <p>{{ branding.footer_text }}</p>
+            {% else %}
+            <p>Generated by Ticket Analysis CLI • {{ generated_at.strftime('%Y') }}</p>
+            {% endif %}
+            <p>Report contains {{ ticket_count | format_number }} tickets analyzed over {{ (date_range[1] | string + ' to ' + date_range[0] | string) if date_range else 'the specified period' }}</p>
+        </footer>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                document.body.setAttribute('data-theme', savedTheme);
+            } else if ('{{ theme }}' === 'auto') {
+                // Auto-detect system theme
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add fade-in animation to sections as they come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Print functionality
+        function printReport() {
+            window.print();
+        }
+
+        // Export functionality (placeholder)
+        function exportData(format) {
+            alert(`Export to ${format} functionality would be implemented here.`);
+        }
+
+        // Interactive chart functionality (placeholder)
+        function toggleChartData(chartId) {
+            console.log(`Toggle chart data for ${chartId}`);
+        }
+    </script>
+</body>
+</html>

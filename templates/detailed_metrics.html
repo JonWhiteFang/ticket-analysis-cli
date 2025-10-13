@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Detailed Metrics</title>
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --background-color: #ffffff;
+            --surface-color: #f8f9fa;
+            --text-color: #2c3e50;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #ecf0f1;
+            --background-color: #2c3e50;
+            --surface-color: #34495e;
+            --text-color: #ecf0f1;
+            --text-muted: #bdc3c7;
+            --border-color: #4a5568;
+            --shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric-section {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .metric-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .metric-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .metric-table tr:hover {
+            background: var(--surface-color);
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .percentile-chart {
+            display: flex;
+            align-items: end;
+            height: 100px;
+            margin: 1rem 0;
+            padding: 0 1rem;
+            background: var(--background-color);
+            border-radius: var(--border-radius);
+        }
+
+        .percentile-bar {
+            flex: 1;
+            background: var(--secondary-color);
+            margin: 0 2px;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .percentile-bar:hover {
+            background: var(--accent-color);
+        }
+
+        .percentile-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .severity-card {
+            background: var(--background-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            border: 2px solid var(--border-color);
+        }
+
+        .severity-sev1 { border-color: #dc3545; }
+        .severity-sev2 { border-color: #fd7e14; }
+        .severity-sev3 { border-color: #ffc107; }
+        .severity-sev4 { border-color: #28a745; }
+        .severity-sev5 { border-color: #6c757d; }
+
+        .severity-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .severity-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .trend-up {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--accent-color);
+        }
+
+        .trend-down {
+            background: rgba(39, 174, 96, 0.1);
+            color: var(--success-color);
+        }
+
+        .trend-stable {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--text-muted);
+        }
+
+        .comparison-section {
+            background: var(--surface-color);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .comparison-item {
+            background: var(--background-color);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .comparison-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .comparison-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .severity-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body data-theme="{{ theme if theme != 'auto' else 'light' }}">
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>{{ title }}</h1>
+            <div style="opacity: 0.9; font-size: 1.1rem;">Detailed Metrics Analysis</div>
+            <div style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Generated on {{ generated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                • {{ ticket_count | format_number }} tickets analyzed
+            </div>
+        </div>
+
+        <!-- Resolution Time Analysis -->
+        {% if metrics.avg_resolution_time_hours or metrics.median_resolution_time_hours %}
+        <div class="metrics-grid">
+            <div class="metric-section">
+                <h2>Resolution Time Statistics</h2>
+                <table class="metric-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if metrics.avg_resolution_time_hours %}
+                        <tr>
+                            <td>Average Resolution Time</td>
+                            <td class="metric-value">{{ (metrics.avg_resolution_time_hours / 24) | round(1) }} days</td>
+                        </tr>
+                        {% endif %}
+                        {% if metrics.median_resolution_time_hours %}
+                        <tr>
+                            <td>Median Resolution Time</td>
+                            <td class="metric-value">{{ (metrics.median_resolution_time_hours / 24) | round(1) }} days</td>
+                        </tr>
+                        {% endif %}
+                        {% if metrics.total_resolved %}
+                        <tr>
+                            <td>Total Resolved Tickets</td>
+                            <td class="metric-value">{{ metrics.total_resolved | format_number }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if metrics.total_resolved and ticket_count %}
+                        <tr>
+                            <td>Resolution Rate</td>
+                            <td class="metric-value">{{ ((metrics.total_resolved / ticket_count) * 100) | round(1) }}%</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Percentiles Visualization -->
+            {% if metrics.percentiles %}
+            <div class="metric-section">
+                <h2>Resolution Time Distribution</h2>
+                <div class="percentile-chart">
+                    {% for percentile, value in metrics.percentiles.items() %}
+                    <div class="percentile-bar" 
+                         style="height: {{ (value / (metrics.percentiles.values() | max)) * 80 }}px;"
+                         title="{{ percentile.upper() }}: {{ (value / 24) | round(1) }} days">
+                        <div class="percentile-label">{{ percentile.upper() }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <table class="metric-table">
+                    <thead>
+                        <tr>
+                            <th>Percentile</th>
+                            <th>Resolution Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for percentile, value in metrics.percentiles.items() %}
+                        <tr>
+                            <td>{{ percentile.upper() }}</td>
+                            <td class="metric-value">{{ (value / 24) | round(1) }} days</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Severity Analysis -->
+        {% if metrics.by_severity %}
+        <div class="metric-section">
+            <h2>Resolution Time by Severity</h2>
+            <div class="severity-grid">
+                {% for severity, time in metrics.by_severity.items() %}
+                <div class="severity-card severity-{{ severity.lower() }}">
+                    <div class="severity-value">{{ (time / 24) | round(1) }}</div>
+                    <div class="severity-label">{{ severity }}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        days avg
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Status Distribution -->
+        {% if metrics.status_counts %}
+        <div class="metric-section">
+            <h2>Status Distribution Analysis</h2>
+            <table class="metric-table">
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for status, count in metrics.status_counts.items() %}
+                    <tr>
+                        <td>{{ status }}</td>
+                        <td class="metric-value">{{ count | format_number }}</td>
+                        <td>
+                            {% if metrics.status_percentages and status in metrics.status_percentages %}
+                            <span class="metric-value">{{ metrics.status_percentages[status] | round(1) }}%</span>
+                            {% else %}
+                            <span class="metric-value">{{ ((count / ticket_count) * 100) | round(1) }}%</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Performance Comparison -->
+        <div class="comparison-section">
+            <h2 style="color: var(--primary-color); margin-bottom: 1.5rem;">Performance Benchmarks</h2>
+            <div class="comparison-grid">
+                {% if metrics.avg_resolution_time_hours %}
+                <div class="comparison-item">
+                    <div class="comparison-value">{{ (metrics.avg_resolution_time_hours / 24) | round(1) }}</div>
+                    <div class="comparison-label">Avg Days to Resolve</div>
+                </div>
+                {% endif %}
+                
+                {% if metrics.median_resolution_time_hours %}
+                <div class="comparison-item">
+                    <div class="comparison-value">{{ (metrics.median_resolution_time_hours / 24) | round(1) }}</div>
+                    <div class="comparison-label">Median Days to Resolve</div>
+                </div>
+                {% endif %}
+                
+                {% if metrics.total_resolved and ticket_count %}
+                <div class="comparison-item">
+                    <div class="comparison-value">{{ ((metrics.total_resolved / ticket_count) * 100) | round(1) }}%</div>
+                    <div class="comparison-label">Resolution Rate</div>
+                </div>
+                {% endif %}
+                
+                {% if metrics.status_counts and 'Open' in metrics.status_counts %}
+                <div class="comparison-item">
+                    <div class="comparison-value">{{ metrics.status_counts['Open'] | format_number }}</div>
+                    <div class="comparison-label">Open Tickets</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Additional Metrics -->
+        {% if metrics %}
+        <div class="metric-section">
+            <h2>Additional Metrics</h2>
+            <table class="metric-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, value in metrics.items() %}
+                    {% if key not in ['avg_resolution_time_hours', 'median_resolution_time_hours', 'total_resolved', 'status_counts', 'status_percentages', 'by_severity', 'percentiles'] %}
+                    <tr>
+                        <td>{{ key.replace('_', ' ').title() }}</td>
+                        <td class="metric-value">
+                            {% if value is number %}
+                                {% if value > 1000 %}
+                                    {{ value | format_number }}
+                                {% else %}
+                                    {{ value | round(2) }}
+                                {% endif %}
+                            {% else %}
+                                {{ value }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <div style="text-align: center; color: var(--text-muted); margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+            <p>Detailed Metrics Report • Generated by Ticket Analysis CLI</p>
+            {% if date_range %}
+            <p>Analysis Period: {{ date_range[0] }} to {{ date_range[1] }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect theme
+        document.addEventListener('DOMContentLoaded', function() {
+            if ('{{ theme }}' === 'auto') {
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.body.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+            }
+        });
+
+        // Add hover effects to percentile bars
+        document.querySelectorAll('.percentile-bar').forEach(bar => {
+            bar.addEventListener('mouseenter', function() {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = this.title;
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: var(--primary-color);
+                    color: white;
+                    padding: 0.5rem;
+                    border-radius: 4px;
+                    font-size: 0.8rem;
+                    z-index: 1000;
+                    pointer-events: none;
+                `;
+                document.body.appendChild(tooltip);
+                
+                this.addEventListener('mousemove', function(e) {
+                    tooltip.style.left = e.pageX + 10 + 'px';
+                    tooltip.style.top = e.pageY - 30 + 'px';
+                });
+                
+                this.addEventListener('mouseleave', function() {
+                    document.body.removeChild(tooltip);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
