@@ -1,48 +1,100 @@
 """Models package for ticket analyzer.
 
-This package contains all data models, enums, and exceptions used throughout
-the application. Models are organized by functionality and follow Python 3.7
-compatibility requirements.
+This package contains all data models, configuration classes, and exceptions
+used throughout the ticket analyzer application. All models are Python 3.7
+compatible and use dataclasses with proper type hints.
 """
 
 from __future__ import annotations
 
-# Import all models for easy access
-from .ticket import Ticket, TicketStatus, TicketSeverity
-from .analysis import AnalysisResult, SearchCriteria
-from .config import ReportConfig, AuthConfig
+# Import ticket models
+from .ticket import (
+    Ticket,
+    TicketStatus,
+    TicketSeverity
+)
+
+# Import analysis models
+from .analysis import (
+    SearchCriteria,
+    AnalysisResult,
+    MetricDefinition,
+    TrendPoint,
+    TrendAnalysis
+)
+
+# Import configuration models
+from .config import (
+    ReportConfig,
+    AuthConfig,
+    MCPConfig,
+    LoggingConfig,
+    ApplicationConfig,
+    OutputFormat,
+    LogLevel
+)
+
+# Import exceptions
 from .exceptions import (
+    # Base exception
     TicketAnalysisError,
+    
+    # Core exceptions
     AuthenticationError,
     ConfigurationError,
     DataRetrievalError,
     AnalysisError,
     ValidationError,
+    
+    # MCP exceptions
     MCPError,
     MCPConnectionError,
     MCPTimeoutError,
     MCPAuthenticationError,
+    
+    # Resilience exceptions
     CircuitBreakerOpenError,
+    
+    # Processing exceptions
     DataProcessingError,
     ReportGenerationError,
-    SecurityError
+    SecurityError,
+    CLIError,
+    FileOperationError,
+    
+    # Utility functions
+    create_error_context,
+    wrap_exception
 )
 
+# Export all public classes and functions
 __all__ = [
-    # Core models
+    # Ticket models
     "Ticket",
-    "TicketStatus",
+    "TicketStatus", 
     "TicketSeverity",
-    "AnalysisResult", 
+    
+    # Analysis models
     "SearchCriteria",
+    "AnalysisResult",
+    "MetricDefinition",
+    "TrendPoint",
+    "TrendAnalysis",
+    
+    # Configuration models
     "ReportConfig",
     "AuthConfig",
+    "MCPConfig",
+    "LoggingConfig",
+    "ApplicationConfig",
+    "OutputFormat",
+    "LogLevel",
     
     # Exceptions
     "TicketAnalysisError",
     "AuthenticationError",
     "ConfigurationError",
-    "DataRetrievalError", 
+    "DataRetrievalError",
     "AnalysisError",
     "ValidationError",
     "MCPError",
@@ -52,5 +104,9 @@ __all__ = [
     "CircuitBreakerOpenError",
     "DataProcessingError",
     "ReportGenerationError",
-    "SecurityError"
+    "SecurityError",
+    "CLIError",
+    "FileOperationError",
+    "create_error_context",
+    "wrap_exception"
 ]
