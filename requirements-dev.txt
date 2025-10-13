@@ -1,0 +1,45 @@
+# Development dependencies for Python 3.7+ compatibility
+
+# Testing framework and utilities
+pytest>=6.0.0,<8.0.0
+pytest-cov>=2.10.0,<4.0.0
+pytest-mock>=3.3.0,<4.0.0
+pytest-asyncio>=0.15.0,<1.0.0
+pytest-xdist>=2.2.0,<4.0.0
+
+# Code formatting and linting
+black>=21.0.0,<24.0.0
+flake8>=3.8.0,<7.0.0
+isort>=5.0.0,<6.0.0
+mypy>=0.800,<2.0.0
+
+# Security scanning
+bandit>=1.7.0,<2.0.0
+safety>=1.10.0,<3.0.0
+
+# Documentation
+sphinx>=3.5.0,<8.0.0
+sphinx-rtd-theme>=0.5.0,<2.0.0
+
+# Pre-commit hooks
+pre-commit>=2.10.0,<4.0.0
+
+# Performance profiling
+memory-profiler>=0.58.0,<1.0.0
+line-profiler>=3.3.0,<5.0.0
+
+# Development utilities
+ipython>=7.16.0,<9.0.0; python_version>="3.7"
+ipdb>=0.13.0,<1.0.0
+
+# Type checking utilities
+types-requests>=2.25.0
+types-PyYAML>=5.4.0
+types-python-dateutil>=2.8.0
+
+# Build and packaging
+build>=0.7.0,<1.0.0
+twine>=3.4.0,<5.0.0
+
+# Coverage reporting
+coverage[toml]>=5.5,<8.0

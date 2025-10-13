@@ -1,0 +1,1 @@
+"""Documentation files for the ticket analyzer application."""
