@@ -21,6 +21,8 @@ A secure, Python 3.7-compatible CLI tool for analyzing ticket data from Amazon's
 - 📋 **Flexible Configuration**: Support for JSON/INI config files, environment variables, and CLI arguments
 - 🧪 **Comprehensive Testing**: 80%+ code coverage with pytest framework
 
+> **Note**: This is a development version. The CLI interface is functional and ready for use. Some advanced features are still being implemented and integrated.
+
 ## Quick Start
 
 ### Prerequisites
@@ -34,29 +36,48 @@ A secure, Python 3.7-compatible CLI tool for analyzing ticket data from Amazon's
 
 ```bash
 # Clone the repository
-git clone https://github.com/org/ticket-analyzer.git
-cd ticket-analyzer
+git clone https://github.com/JonWhiteFang/ticket-analysis-cli.git
+cd ticket-analysis-cli
 
 # Create and activate virtual environment
-python3.7 -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On macOS/Linux
 # venv\Scripts\activate   # On Windows
 
 # Install dependencies
 pip3 install -r requirements.txt
 
+# Make the CLI script executable
+chmod +x ticket-analyzer
+
 # Verify installation
-ticket-analyzer --version
+./ticket-analyzer --version
+
+# Run comprehensive verification (optional)
+python3 verify-installation.py
 ```
 
 ### Basic Usage
 
 ```bash
+# Method 1: Using the wrapper script (recommended)
+./ticket-analyzer --version
+./ticket-analyzer --help
+
+# Method 2: Using Python module execution
+python3 -m ticket_analyzer.cli.main --version
+python3 -m ticket_analyzer.cli.main --help
+
+# View available commands and options
+./ticket-analyzer analyze --help
+./ticket-analyzer config --help
+./ticket-analyzer report --help
+
 # Authenticate with Midway (required first step)
 mwinit -o
 
 # Analyze tickets with default settings (last 30 days)
-ticket-analyzer analyze
+./ticket-analyzer analyze
 
 # Analyze specific tickets by ID
 ticket-analyzer analyze --ticket-ids T123456 T789012
@@ -108,6 +129,72 @@ cat > ~/.ticket-analyzer/config.json << EOF
   }
 }
 EOF
+```
+
+## Troubleshooting
+
+### Command Not Found Error
+
+If you get `zsh: command not found: ticket-analyzer`, use one of these solutions:
+
+**Option 1: Use the wrapper script (recommended)**
+```bash
+# Make sure you're in the project directory
+cd ticket-analysis-cli
+
+# Make the script executable
+chmod +x ticket-analyzer
+
+# Run the CLI
+./ticket-analyzer --version
+```
+
+**Option 2: Use Python module execution**
+```bash
+# Run directly as a Python module
+python3 -m ticket_analyzer.cli.main --version
+python3 -m ticket_analyzer.cli.main analyze --help
+```
+
+**Option 3: Add to PATH (optional)**
+```bash
+# Add the project directory to your PATH
+export PATH="$PATH:$(pwd)"
+
+# Now you can use ticket-analyzer directly
+ticket-analyzer --version
+```
+
+### Common Issues
+
+**Authentication Issues**
+```bash
+# Refresh Midway authentication
+mwinit -o
+
+# Check authentication status
+mwinit -s
+```
+
+**Permission Errors**
+```bash
+# Ensure script is executable
+chmod +x ticket-analyzer
+
+# Check Python permissions
+python3 --version
+```
+
+**Missing Dependencies**
+```bash
+# Reinstall dependencies
+pip3 install -r requirements.txt
+
+# Run verification script to check everything
+python3 verify-installation.py
+
+# Manual check for missing packages
+python3 -c "import click, pandas, tqdm; print('Dependencies OK')"
 ```
 
 ## Documentation
