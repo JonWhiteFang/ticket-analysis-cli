@@ -51,6 +51,7 @@ from .exceptions import (
     MCPConnectionError,
     MCPTimeoutError,
     MCPAuthenticationError,
+    MCPResponseError,
     
     # Resilience exceptions
     CircuitBreakerOpenError,
@@ -101,6 +102,7 @@ __all__ = [
     "MCPConnectionError",
     "MCPTimeoutError",
     "MCPAuthenticationError",
+    "MCPResponseError",
     "CircuitBreakerOpenError",
     "DataProcessingError",
     "ReportGenerationError",

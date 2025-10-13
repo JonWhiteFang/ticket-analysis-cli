@@ -123,26 +123,32 @@ class AuthenticationSessionInterface(ABC):
 
 # Data Retrieval Interfaces
 class DataRetrievalInterface(ABC):
-    """Abstract interface for ticket data retrieval operations."""
+    """Abstract interface for ticket data retrieval operations.
+    
+    This interface defines the contract for retrieving ticket data from external
+    sources such as MCP services. Implementations should handle authentication,
+    connection management, error handling, and data validation.
+    """
     
     @abstractmethod
     def search_tickets(self, criteria: SearchCriteria) -> List[Ticket]:
-        """Search for tickets based on criteria.
+        """Search for tickets based on criteria with Lucene query support.
         
         Args:
-            criteria: Search criteria for filtering tickets.
+            criteria: Search criteria for filtering tickets including Lucene queries.
             
         Returns:
             List of tickets matching the criteria.
             
         Raises:
             DataRetrievalError: If search operation fails.
+            AuthenticationError: If authentication is required but not available.
         """
         pass
     
     @abstractmethod
     def get_ticket_by_id(self, ticket_id: str) -> Optional[Ticket]:
-        """Retrieve a specific ticket by ID.
+        """Retrieve a specific ticket by ID with full details.
         
         Args:
             ticket_id: Unique identifier for the ticket.
@@ -152,12 +158,13 @@ class DataRetrievalInterface(ABC):
             
         Raises:
             DataRetrievalError: If retrieval operation fails.
+            AuthenticationError: If authentication is required but not available.
         """
         pass
     
     @abstractmethod
     def count_tickets(self, criteria: SearchCriteria) -> int:
-        """Count tickets matching criteria without retrieving them.
+        """Count tickets matching criteria without retrieving full data.
         
         Args:
             criteria: Search criteria for filtering tickets.
@@ -167,6 +174,96 @@ class DataRetrievalInterface(ABC):
             
         Raises:
             DataRetrievalError: If count operation fails.
+            AuthenticationError: If authentication is required but not available.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_connection(self) -> bool:
+        """Validate connection to data source.
+        
+        Returns:
+            True if connection is valid and operational, False otherwise.
+            
+        Raises:
+            DataRetrievalError: If connection validation fails.
+        """
+        pass
+    
+    @abstractmethod
+    def get_ticket_details(self, ticket_id: str) -> Optional[Dict[str, Any]]:
+        """Retrieve detailed ticket information including metadata.
+        
+        Args:
+            ticket_id: Unique identifier for the ticket.
+            
+        Returns:
+            Dictionary containing detailed ticket information, None if not found.
+            
+        Raises:
+            DataRetrievalError: If retrieval operation fails.
+            AuthenticationError: If authentication is required but not available.
+        """
+        pass
+    
+    @abstractmethod
+    def search_tickets_paginated(self, criteria: SearchCriteria, 
+                                page_size: int = 100, 
+                                page_token: Optional[str] = None) -> Dict[str, Any]:
+        """Search tickets with pagination support.
+        
+        Args:
+            criteria: Search criteria for filtering tickets.
+            page_size: Number of tickets per page (default: 100).
+            page_token: Token for retrieving specific page (None for first page).
+            
+        Returns:
+            Dictionary containing:
+                - 'tickets': List of tickets for current page
+                - 'next_page_token': Token for next page (None if last page)
+                - 'total_count': Total number of matching tickets
+                - 'page_size': Actual page size returned
+            
+        Raises:
+            DataRetrievalError: If search operation fails.
+            AuthenticationError: If authentication is required but not available.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_search_criteria(self, criteria: SearchCriteria) -> bool:
+        """Validate search criteria before executing search.
+        
+        Args:
+            criteria: Search criteria to validate.
+            
+        Returns:
+            True if criteria is valid, False otherwise.
+            
+        Raises:
+            ValidationError: If criteria contains invalid parameters.
+        """
+        pass
+    
+    @abstractmethod
+    def get_supported_query_fields(self) -> List[str]:
+        """Get list of supported query fields for search operations.
+        
+        Returns:
+            List of field names that can be used in search queries.
+        """
+        pass
+    
+    @abstractmethod
+    def test_connectivity(self) -> Dict[str, Any]:
+        """Test connectivity to data source and return status information.
+        
+        Returns:
+            Dictionary containing connectivity status and diagnostic information:
+                - 'connected': Boolean indicating connection status
+                - 'response_time_ms': Response time in milliseconds
+                - 'server_info': Server information if available
+                - 'error_message': Error message if connection failed
         """
         pass
 
@@ -546,40 +643,57 @@ class ConfigurationSourceInterface(ABC):
 
 # External Service Interfaces
 class MCPClientInterface(ABC):
-    """Abstract interface for MCP client operations."""
+    """Abstract interface for MCP (Model Context Protocol) client operations.
+    
+    This interface defines the contract for communicating with MCP servers,
+    including connection management, request handling, and error recovery.
+    Implementations must support Node.js 16+ compatibility and handle
+    subprocess communication securely.
+    """
     
     @abstractmethod
     def connect(self) -> None:
-        """Establish connection to MCP server.
+        """Establish connection to MCP server with Node.js compatibility check.
         
         Raises:
             MCPConnectionError: If connection fails.
+            NodeCompatibilityError: If Node.js version is incompatible.
         """
         pass
     
     @abstractmethod
     def disconnect(self) -> None:
-        """Close connection to MCP server."""
+        """Close connection to MCP server and cleanup resources."""
+        pass
+    
+    @abstractmethod
+    def is_connected(self) -> bool:
+        """Check if client is currently connected to MCP server.
+        
+        Returns:
+            True if connected, False otherwise.
+        """
         pass
     
     @abstractmethod
     def search_tickets(self, query: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Search tickets via MCP.
+        """Search tickets via MCP with TicketingReadActions integration.
         
         Args:
-            query: Search query parameters.
+            query: Search query parameters including Lucene syntax support.
             
         Returns:
-            List of raw ticket data.
+            List of raw ticket data from MCP response.
             
         Raises:
             MCPError: If search operation fails.
+            AuthenticationError: If MCP authentication fails.
         """
         pass
     
     @abstractmethod
     def get_ticket(self, ticket_id: str) -> Optional[Dict[str, Any]]:
-        """Get ticket by ID via MCP.
+        """Get ticket by ID via MCP with detailed information.
         
         Args:
             ticket_id: Ticket identifier.
@@ -589,13 +703,147 @@ class MCPClientInterface(ABC):
             
         Raises:
             MCPError: If retrieval operation fails.
+            AuthenticationError: If MCP authentication fails.
         """
+        pass
+    
+    @abstractmethod
+    def send_request(self, method: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Send generic MCP request with error handling and retry logic.
+        
+        Args:
+            method: MCP method name to call.
+            params: Parameters for the MCP method.
+            
+        Returns:
+            Response data from MCP server.
+            
+        Raises:
+            MCPError: If request fails.
+            MCPTimeoutError: If request times out.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_node_version(self) -> bool:
+        """Validate Node.js version compatibility (16+).
+        
+        Returns:
+            True if Node.js version is compatible, False otherwise.
+            
+        Raises:
+            NodeCompatibilityError: If Node.js is not available or incompatible.
+        """
+        pass
+    
+    @abstractmethod
+    def get_server_info(self) -> Dict[str, Any]:
+        """Get information about connected MCP server.
+        
+        Returns:
+            Dictionary containing server information and capabilities.
+            
+        Raises:
+            MCPError: If server info retrieval fails.
+        """
+        pass
+    
+    @abstractmethod
+    def health_check(self) -> Dict[str, Any]:
+        """Perform health check on MCP connection.
+        
+        Returns:
+            Dictionary containing health status and diagnostic information.
+        """
+        pass
+
+
+class MCPRequestInterface(ABC):
+    """Abstract interface for MCP request handling and formatting."""
+    
+    @abstractmethod
+    def format_search_request(self, criteria: SearchCriteria) -> Dict[str, Any]:
+        """Format search criteria into MCP request format.
+        
+        Args:
+            criteria: Search criteria to format.
+            
+        Returns:
+            Dictionary formatted for MCP request.
+        """
+        pass
+    
+    @abstractmethod
+    def format_ticket_request(self, ticket_id: str) -> Dict[str, Any]:
+        """Format ticket ID request into MCP request format.
+        
+        Args:
+            ticket_id: Ticket ID to format.
+            
+        Returns:
+            Dictionary formatted for MCP request.
+        """
+        pass
+    
+    @abstractmethod
+    def parse_response(self, response: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Parse MCP response into standardized format.
+        
+        Args:
+            response: Raw MCP response.
+            
+        Returns:
+            List of parsed ticket data.
+            
+        Raises:
+            MCPResponseError: If response format is invalid.
+        """
+        pass
+
+
+class ResilienceInterface(ABC):
+    """Abstract interface for resilience patterns (Circuit Breaker, Retry, etc.)."""
+    
+    @abstractmethod
+    def execute_with_resilience(self, operation: callable, *args, **kwargs) -> Any:
+        """Execute operation with resilience patterns applied.
+        
+        Args:
+            operation: Function to execute with resilience.
+            *args: Positional arguments for the operation.
+            **kwargs: Keyword arguments for the operation.
+            
+        Returns:
+            Result of the operation.
+            
+        Raises:
+            ResilienceError: If operation fails after all retry attempts.
+        """
+        pass
+    
+    @abstractmethod
+    def get_circuit_state(self) -> str:
+        """Get current circuit breaker state.
+        
+        Returns:
+            Circuit state: 'CLOSED', 'OPEN', or 'HALF_OPEN'.
+        """
+        pass
+    
+    @abstractmethod
+    def reset_circuit(self) -> None:
+        """Manually reset circuit breaker to CLOSED state."""
         pass
 
 
 # Security and Validation Interfaces
 class DataSanitizerInterface(ABC):
-    """Abstract interface for data sanitization operations."""
+    """Abstract interface for data sanitization operations.
+    
+    This interface defines methods for sanitizing sensitive data in tickets,
+    logs, and other outputs to prevent information leakage and ensure
+    compliance with security requirements.
+    """
     
     @abstractmethod
     def sanitize_ticket_data(self, ticket_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -605,7 +853,7 @@ class DataSanitizerInterface(ABC):
             ticket_data: Raw ticket data to sanitize.
             
         Returns:
-            Sanitized ticket data.
+            Sanitized ticket data with PII and sensitive information removed.
         """
         pass
     
@@ -617,21 +865,50 @@ class DataSanitizerInterface(ABC):
             message: Log message to sanitize.
             
         Returns:
-            Sanitized log message.
+            Sanitized log message safe for logging.
+        """
+        pass
+    
+    @abstractmethod
+    def detect_sensitive_data(self, text: str) -> List[str]:
+        """Detect types of sensitive data present in text.
+        
+        Args:
+            text: Text to analyze for sensitive data.
+            
+        Returns:
+            List of detected sensitive data types (e.g., 'email', 'ssn', 'phone').
+        """
+        pass
+    
+    @abstractmethod
+    def sanitize_search_criteria(self, criteria: SearchCriteria) -> SearchCriteria:
+        """Sanitize search criteria to remove sensitive information.
+        
+        Args:
+            criteria: Search criteria to sanitize.
+            
+        Returns:
+            Sanitized search criteria safe for logging and processing.
         """
         pass
 
 
 class InputValidatorInterface(ABC):
-    """Abstract interface for input validation operations."""
+    """Abstract interface for comprehensive input validation operations.
+    
+    This interface defines methods for validating and sanitizing user inputs
+    to prevent injection attacks, ensure data integrity, and maintain
+    system security.
+    """
     
     @abstractmethod
     def validate_input(self, value: str, input_type: str) -> bool:
-        """Validate input value against type constraints.
+        """Validate input value against type-specific constraints.
         
         Args:
             value: Input value to validate.
-            input_type: Type of input for validation rules.
+            input_type: Type of input for validation rules (e.g., 'ticket_id', 'username').
             
         Returns:
             True if input is valid, False otherwise.
@@ -647,7 +924,112 @@ class InputValidatorInterface(ABC):
             input_type: Type of input for sanitization rules.
             
         Returns:
-            Sanitized input value.
+            Sanitized input value safe for processing.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_search_criteria(self, criteria: SearchCriteria) -> bool:
+        """Validate search criteria for security and correctness.
+        
+        Args:
+            criteria: Search criteria to validate.
+            
+        Returns:
+            True if criteria is valid and safe, False otherwise.
+            
+        Raises:
+            ValidationError: If criteria contains invalid or dangerous content.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_ticket_id(self, ticket_id: str) -> bool:
+        """Validate ticket ID format and security.
+        
+        Args:
+            ticket_id: Ticket ID to validate.
+            
+        Returns:
+            True if ticket ID is valid, False otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_date_range(self, start_date: str, end_date: str) -> bool:
+        """Validate date range for search operations.
+        
+        Args:
+            start_date: Start date in ISO format.
+            end_date: End date in ISO format.
+            
+        Returns:
+            True if date range is valid, False otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def detect_injection_attempt(self, value: str) -> bool:
+        """Detect potential injection attacks in input.
+        
+        Args:
+            value: Input value to check for injection patterns.
+            
+        Returns:
+            True if injection attempt detected, False otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def get_validation_errors(self, value: str, input_type: str) -> List[str]:
+        """Get detailed validation errors for input value.
+        
+        Args:
+            value: Input value to validate.
+            input_type: Type of input for validation rules.
+            
+        Returns:
+            List of validation error messages.
+        """
+        pass
+
+
+class DataValidationInterface(ABC):
+    """Abstract interface for data validation operations on retrieved data."""
+    
+    @abstractmethod
+    def validate_ticket_data(self, ticket_data: Dict[str, Any]) -> bool:
+        """Validate ticket data structure and content.
+        
+        Args:
+            ticket_data: Ticket data to validate.
+            
+        Returns:
+            True if ticket data is valid, False otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_response_format(self, response: Dict[str, Any]) -> bool:
+        """Validate MCP response format and structure.
+        
+        Args:
+            response: MCP response to validate.
+            
+        Returns:
+            True if response format is valid, False otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def clean_ticket_data(self, ticket_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Clean and normalize ticket data for processing.
+        
+        Args:
+            ticket_data: Raw ticket data to clean.
+            
+        Returns:
+            Cleaned and normalized ticket data.
         """
         pass
 

@@ -313,6 +313,28 @@ class MCPAuthenticationError(MCPError):
         self.error_code = "MCP_AUTH_ERROR"
 
 
+class MCPResponseError(MCPError):
+    """Raised when MCP response format is invalid or unexpected.
+    
+    This includes malformed JSON responses, missing expected fields,
+    and response structure validation failures.
+    """
+    
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None,
+                 response_data: Optional[Dict[str, Any]] = None) -> None:
+        """Initialize MCP response error.
+        
+        Args:
+            message: Error message.
+            details: Additional error details.
+            response_data: Raw response data that caused the error.
+        """
+        super().__init__(message, details, "parse_response")
+        self.error_code = "MCP_RESPONSE_ERROR"
+        if response_data:
+            self.add_detail("response_data", response_data)
+
+
 # Circuit breaker and resilience exceptions
 class CircuitBreakerOpenError(DataRetrievalError):
     """Raised when circuit breaker is open.
