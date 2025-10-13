@@ -1,0 +1,50 @@
+{
+  "auth": {
+    "timeout_seconds": 60,
+    "max_retry_attempts": 3,
+    "check_interval_seconds": 300,
+    "session_duration_hours": 8,
+    "auto_refresh": true,
+    "require_auth": true,
+    "auth_method": "midway",
+    "cache_credentials": false
+  },
+  "report": {
+    "format": "table",
+    "output_path": null,
+    "include_charts": true,
+    "color_output": true,
+    "template_name": null,
+    "sanitize_output": true,
+    "max_results_display": 100,
+    "show_progress": true,
+    "verbose": false,
+    "theme": "auto"
+  },
+  "mcp": {
+    "server_command": ["node", "mcp-server.js"],
+    "connection_timeout": 30,
+    "request_timeout": 60,
+    "max_retries": 3,
+    "retry_delay": 1.0,
+    "circuit_breaker_threshold": 5,
+    "circuit_breaker_timeout": 60,
+    "enable_logging": false
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file_path": null,
+    "max_file_size": 10485760,
+    "backup_count": 5,
+    "sanitize_logs": true,
+    "include_timestamps": true,
+    "include_caller_info": false
+  },
+  "data_dir": null,
+  "config_dir": null,
+  "cache_dir": null,
+  "temp_dir": null,
+  "debug_mode": false,
+  "max_concurrent_requests": 10
+}

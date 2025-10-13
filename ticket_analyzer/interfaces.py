@@ -300,19 +300,190 @@ class ConfigurationInterface(ABC):
             ConfigurationError: If validation fails.
         """
         pass
-
-
-class ConfigurationHandlerInterface(ABC):
-    """Abstract interface for configuration source handlers."""
     
     @abstractmethod
-    def can_handle(self, source: str) -> bool:
-        """Check if handler can process the configuration source."""
+    def set_setting(self, key: str, value: Any) -> None:
+        """Set a configuration setting.
+        
+        Args:
+            key: Configuration key to set.
+            value: Value to set for the key.
+            
+        Raises:
+            ConfigurationError: If setting cannot be updated.
+        """
         pass
     
     @abstractmethod
-    def load_from_source(self, source: str) -> Dict[str, Any]:
-        """Load configuration from specific source."""
+    def has_setting(self, key: str) -> bool:
+        """Check if a configuration setting exists.
+        
+        Args:
+            key: Configuration key to check.
+            
+        Returns:
+            True if setting exists, False otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def get_all_settings(self) -> Dict[str, Any]:
+        """Get all configuration settings.
+        
+        Returns:
+            Dictionary containing all configuration settings.
+        """
+        pass
+
+
+class ConfigurationHandlerInterface(ABC):
+    """Abstract interface for configuration source handlers in Chain of Responsibility pattern."""
+    
+    @abstractmethod
+    def set_next(self, handler: 'ConfigurationHandlerInterface') -> 'ConfigurationHandlerInterface':
+        """Set the next handler in the chain.
+        
+        Args:
+            handler: Next handler in the chain.
+            
+        Returns:
+            The handler that was set as next.
+        """
+        pass
+    
+    @abstractmethod
+    def handle(self, key: str) -> Optional[Any]:
+        """Handle configuration request for a specific key.
+        
+        Args:
+            key: Configuration key to retrieve.
+            
+        Returns:
+            Configuration value if found, None otherwise.
+        """
+        pass
+    
+    @abstractmethod
+    def load_all(self) -> Dict[str, Any]:
+        """Load all configuration from this handler's source.
+        
+        Returns:
+            Dictionary containing all configuration from this source.
+        """
+        pass
+    
+    @abstractmethod
+    def can_handle_source(self, source_type: str) -> bool:
+        """Check if handler can process the configuration source type.
+        
+        Args:
+            source_type: Type of configuration source (e.g., 'file', 'env', 'cli').
+            
+        Returns:
+            True if handler can process this source type.
+        """
+        pass
+
+
+class ConfigurationValidatorInterface(ABC):
+    """Abstract interface for configuration validation."""
+    
+    @abstractmethod
+    def validate_setting(self, key: str, value: Any) -> bool:
+        """Validate a single configuration setting.
+        
+        Args:
+            key: Configuration key.
+            value: Value to validate.
+            
+        Returns:
+            True if setting is valid, False otherwise.
+            
+        Raises:
+            ConfigurationError: If validation fails with details.
+        """
+        pass
+    
+    @abstractmethod
+    def validate_schema(self, config: Dict[str, Any]) -> bool:
+        """Validate entire configuration against schema.
+        
+        Args:
+            config: Configuration dictionary to validate.
+            
+        Returns:
+            True if configuration is valid, False otherwise.
+            
+        Raises:
+            ConfigurationError: If validation fails with details.
+        """
+        pass
+    
+    @abstractmethod
+    def get_validation_errors(self, config: Dict[str, Any]) -> List[str]:
+        """Get list of validation errors for configuration.
+        
+        Args:
+            config: Configuration dictionary to validate.
+            
+        Returns:
+            List of validation error messages.
+        """
+        pass
+    
+    @abstractmethod
+    def get_schema(self) -> Dict[str, Any]:
+        """Get the configuration schema.
+        
+        Returns:
+            Dictionary representing the configuration schema.
+        """
+        pass
+
+
+class ConfigurationSourceInterface(ABC):
+    """Abstract interface for configuration sources (files, environment, etc.)."""
+    
+    @abstractmethod
+    def exists(self) -> bool:
+        """Check if configuration source exists.
+        
+        Returns:
+            True if source exists and is accessible.
+        """
+        pass
+    
+    @abstractmethod
+    def read(self) -> Dict[str, Any]:
+        """Read configuration from source.
+        
+        Returns:
+            Dictionary containing configuration data.
+            
+        Raises:
+            ConfigurationError: If reading fails.
+        """
+        pass
+    
+    @abstractmethod
+    def write(self, config: Dict[str, Any]) -> None:
+        """Write configuration to source.
+        
+        Args:
+            config: Configuration data to write.
+            
+        Raises:
+            ConfigurationError: If writing fails.
+        """
+        pass
+    
+    @abstractmethod
+    def get_source_info(self) -> Dict[str, Any]:
+        """Get information about the configuration source.
+        
+        Returns:
+            Dictionary containing source metadata.
+        """
         pass
 
 

@@ -1,0 +1,127 @@
+# Ticket Analyzer Configuration File (INI Format)
+# Copy this file to ~/.ticket-analyzer/config.ini and modify as needed
+
+[auth]
+# Authentication timeout in seconds (1-300)
+timeout_seconds = 60
+
+# Maximum number of authentication retry attempts (0-10)
+max_retry_attempts = 3
+
+# How often to check authentication status in seconds
+check_interval_seconds = 300
+
+# Authentication session duration in hours (1-24)
+session_duration_hours = 8
+
+# Whether to automatically refresh expired sessions
+auto_refresh = true
+
+# Whether authentication is required
+require_auth = true
+
+# Authentication method: midway, kerberos, or none
+auth_method = midway
+
+# Whether to cache authentication state (not recommended for security)
+cache_credentials = false
+
+[report]
+# Output format: table, json, csv, html, yaml
+format = table
+
+# Output file path (leave empty for stdout)
+output_path = 
+
+# Whether to include charts in HTML reports
+include_charts = true
+
+# Whether to use color in CLI output
+color_output = true
+
+# Custom template name for HTML reports
+template_name = 
+
+# Whether to sanitize sensitive data in output
+sanitize_output = true
+
+# Maximum number of results to display (1-10000)
+max_results_display = 100
+
+# Whether to show progress indicators
+show_progress = true
+
+# Whether to include verbose details
+verbose = false
+
+# Color theme: light, dark, auto
+theme = auto
+
+[mcp]
+# MCP server command (comma-separated for multiple arguments)
+server_command = node,mcp-server.js
+
+# Connection timeout in seconds
+connection_timeout = 30
+
+# Request timeout in seconds
+request_timeout = 60
+
+# Maximum number of retry attempts
+max_retries = 3
+
+# Base delay between retries in seconds
+retry_delay = 1.0
+
+# Circuit breaker failure threshold
+circuit_breaker_threshold = 5
+
+# Circuit breaker timeout in seconds
+circuit_breaker_timeout = 60
+
+# Whether to enable MCP request/response logging
+enable_logging = false
+
+[logging]
+# Logging level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+level = INFO
+
+# Log message format
+format = %(asctime)s - %(name)s - %(levelname)s - %(message)s
+
+# Log file path (leave empty for console only)
+file_path = 
+
+# Maximum log file size in bytes
+max_file_size = 10485760
+
+# Number of backup log files to keep
+backup_count = 5
+
+# Whether to sanitize sensitive data in logs
+sanitize_logs = true
+
+# Whether to include timestamps in logs
+include_timestamps = true
+
+# Whether to include caller information in logs
+include_caller_info = false
+
+[general]
+# Application data directory
+data_dir = 
+
+# Configuration directory
+config_dir = 
+
+# Cache directory
+cache_dir = 
+
+# Temporary files directory
+temp_dir = 
+
+# Whether to enable debug mode
+debug_mode = false
+
+# Maximum number of concurrent API requests (1-100)
+max_concurrent_requests = 10
