@@ -80,27 +80,51 @@ mwinit -o
 ./ticket-analyzer analyze
 
 # Analyze specific tickets by ID
-ticket-analyzer analyze --ticket-ids T123456 T789012
+ticket-analyzer analyze --ticket-ids T123456 T789012 --format json
 
-# Generate JSON report with custom date range
+# Generate comprehensive HTML report with charts
 ticket-analyzer analyze \
-  --format json \
-  --output results.json \
+  --format html \
+  --output report.html \
+  --include-charts \
   --start-date 2024-01-01 \
   --end-date 2024-01-31
 
-# Filter by status and generate HTML report
+# Filter by status and severity with team performance analysis
 ticket-analyzer analyze \
   --status "Open" "In Progress" \
-  --format html \
-  --output report.html \
-  --max-results 500
-
-# Analyze by resolver group with verbose output
-ticket-analyzer analyze \
+  --severity SEV_1 SEV_2 \
+  --team-performance \
   --resolver-group "My Team" \
-  --verbose \
-  --progress
+  --verbose
+
+# Trend analysis for last quarter with priority breakdown
+ticket-analyzer analyze \
+  --date-range quarter \
+  --trend-analysis \
+  --priority-analysis \
+  --format html \
+  --output quarterly-trends.html
+
+# Search for specific issues with comprehensive analysis
+ticket-analyzer analyze \
+  --search-term "authentication error" \
+  --tags urgent production \
+  --include-resolved \
+  --export-raw-data \
+  --format json \
+  --output auth-issues.json
+
+# Configuration management examples
+ticket-analyzer config show --format json --show-sources
+ticket-analyzer config set authentication.timeout 120 --type int
+ticket-analyzer config validate --strict --fix-issues
+
+# Report management examples
+ticket-analyzer report list --format-filter html --sort-by date
+ticket-analyzer report convert analysis.json --format html --include-charts
+ticket-analyzer report merge report1.json report2.json --output combined.html
+ticket-analyzer report clean --older-than 30 --dry-run
 ```
 
 ### Configuration
@@ -201,6 +225,7 @@ python3 -c "import click, pandas, tqdm; print('Dependencies OK')"
 
 - [Installation Guide](docs/installation.md) - Detailed setup instructions
 - [User Guide](docs/user-guide.md) - Comprehensive usage documentation
+- [CLI Reference](docs/cli-reference.md) - Complete command-line interface documentation
 - [API Documentation](docs/api.md) - Developer API reference
 - [Configuration Guide](docs/configuration.md) - Configuration options and examples
 - [Security Guidelines](docs/security.md) - Security best practices and data handling
@@ -213,24 +238,82 @@ python3 -c "import click, pandas, tqdm; print('Dependencies OK')"
 
 | Command | Description | Example |
 |---------|-------------|---------|
-| `analyze` | Analyze ticket data with filters | `ticket-analyzer analyze --status Open` |
-| `config` | Manage configuration settings | `ticket-analyzer config show` |
-| `version` | Show version information | `ticket-analyzer --version` |
+| `analyze` | Analyze ticket data with comprehensive filtering | `ticket-analyzer analyze --status Open --days-back 7` |
+| `config` | Manage configuration settings | `ticket-analyzer config show --format json` |
+| `report` | Generate and manage analysis reports | `ticket-analyzer report list --format-filter html` |
 
-### Analysis Options
+### Analyze Command Options
 
+#### Time Period Options
 | Option | Description | Default | Example |
 |--------|-------------|---------|---------|
-| `--format` | Output format (table, json, csv, html) | `table` | `--format json` |
+| `--start-date` | Start date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS) | 30 days ago | `--start-date 2024-01-01` |
+| `--end-date` | End date (YYYY-MM-DD or YYYY-MM-DD HH:MM:SS) | today | `--end-date 2024-01-31` |
+| `--days-back` | Number of days back from today (1-365) | 30 | `--days-back 7` |
+| `--date-range` | Predefined ranges (today, yesterday, week, month, quarter) | none | `--date-range week` |
+
+#### Filtering Options
+| Option | Description | Example |
+|--------|-------------|---------|
+| `--ticket-ids` | Specific ticket IDs (multiple allowed) | `--ticket-ids T123456 T789012` |
+| `--status` | Filter by status (multiple allowed) | `--status Open "In Progress" Resolved` |
+| `--severity` | Filter by severity (multiple allowed) | `--severity SEV_1 SEV_2` |
+| `--assignee` | Filter by assignee (multiple allowed) | `--assignee user1 user2` |
+| `--resolver-group` | Filter by resolver group (multiple allowed) | `--resolver-group "Team A" "Team B"` |
+| `--tags` | Filter by tags (multiple allowed) | `--tags urgent production bug` |
+| `--search-term` | Search in title/description | `--search-term "authentication error"` |
+
+#### Analysis Options
+| Option | Description | Default | Example |
+|--------|-------------|---------|---------|
+| `--include-resolved` | Include resolved tickets | false | `--include-resolved` |
+| `--exclude-automated` | Exclude automated tickets | false | `--exclude-automated` |
+| `--priority-analysis` | Include priority-based analysis | false | `--priority-analysis` |
+| `--trend-analysis` | Include trend analysis over time | false | `--trend-analysis` |
+| `--team-performance` | Include team performance metrics | false | `--team-performance` |
+| `--export-raw-data` | Export raw ticket data with analysis | false | `--export-raw-data` |
+
+#### Output Options
+| Option | Description | Default | Example |
+|--------|-------------|---------|---------|
+| `--format` | Output format (table, json, csv, html) | table | `--format json` |
 | `--output` | Output file path | stdout | `--output report.html` |
-| `--start-date` | Start date (YYYY-MM-DD) | 30 days ago | `--start-date 2024-01-01` |
-| `--end-date` | End date (YYYY-MM-DD) | today | `--end-date 2024-01-31` |
-| `--status` | Filter by ticket status | all | `--status "Open" "Resolved"` |
-| `--assignee` | Filter by assignee | all | `--assignee username` |
-| `--resolver-group` | Filter by resolver group | all | `--resolver-group "My Team"` |
-| `--max-results` | Maximum results to return | 100 | `--max-results 500` |
-| `--verbose` | Enable verbose output | false | `--verbose` |
-| `--progress` | Show progress indicators | false | `--progress` |
+| `--max-results` | Maximum results (1-10000) | 1000 | `--max-results 500` |
+| `--include-charts` | Include charts in HTML reports | true | `--include-charts` |
+| `--no-color` | Disable colored output | false | `--no-color` |
+
+#### Configuration Options
+| Option | Description | Default | Example |
+|--------|-------------|---------|---------|
+| `--config-file` | Override configuration file | auto-detect | `--config-file custom.json` |
+| `--timeout` | Request timeout in seconds (10-300) | 60 | `--timeout 120` |
+| `--batch-size` | Batch size for processing (10-1000) | 100 | `--batch-size 50` |
+
+#### Authentication Options
+| Option | Description | Default | Example |
+|--------|-------------|---------|---------|
+| `--auth-timeout` | Authentication timeout (30-300 seconds) | 60 | `--auth-timeout 90` |
+| `--force-auth` | Force re-authentication | false | `--force-auth` |
+| `--skip-auth-check` | Skip initial auth check (use with caution) | false | `--skip-auth-check` |
+
+### Config Command Options
+
+| Subcommand | Description | Example |
+|------------|-------------|---------|
+| `show` | Display current configuration | `config show --section authentication` |
+| `set` | Set configuration value | `config set output_format json --type string` |
+| `unset` | Remove configuration value | `config unset custom_setting` |
+| `validate` | Validate configuration file | `config validate --strict --fix-issues` |
+| `init` | Initialize new configuration | `config init --format json --template comprehensive` |
+
+### Report Command Options
+
+| Subcommand | Description | Example |
+|------------|-------------|---------|
+| `list` | List available reports | `report list --format-filter html --sort-by date` |
+| `convert` | Convert report between formats | `report convert analysis.json --format html` |
+| `merge` | Merge multiple reports | `report merge *.json --output combined.html` |
+| `clean` | Clean up old reports | `report clean --older-than 7 --dry-run` |
 
 ## Project Structure
 

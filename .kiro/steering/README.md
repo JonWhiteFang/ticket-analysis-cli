@@ -1,36 +1,35 @@
 # Steering Files Configuration
 
-This directory contains steering files that provide context-specific guidance for development. Each file is configured with conditional inclusion patterns to ensure they're only loaded when relevant.
+This directory contains concise steering files that provide context-specific guidance for development. Each file is configured with conditional inclusion patterns to ensure they're only loaded when relevant.
 
 ## Inclusion Patterns
 
 ### File Match Patterns
-These files are included when working with files that match specific patterns:
+These files are automatically included when working with matching files:
 
-- **testing-standards.md**: Included when working with test files (`test*`)
-- **authentication-security.md**: Included when working with authentication-related files (`*auth*`)
-- **cli-development-standards.md**: Included when working with CLI-related files (`*cli*`)
-- **data-sanitization.md**: Included when working with sanitization-related files (`*sanitiz*`)
-- **mcp-integration-architecture.md**: Included when working with MCP-related files (`*mcp*`)
-- **documentation-standards.md**: Included when working with documentation files (`*{README,CHANGELOG,*.md}`)
-- **dependency-management.md**: Included when working with dependency files (`{requirements*.txt,pyproject.toml,setup.py,package.json}`)
-- **design-patterns.md**: Included when working with service/repository/pattern files (`*{service,repository,pattern}*`)
-- **clean-architecture-patterns.md**: Included when working with architecture files (`*{service,repository,model,domain}*`)
-- **python-coding-standards.md**: Included when working with Python files (`*.py`)
-- **secure-coding-practices.md**: Included when working with security-related files (`*{security,secure,auth,valid}*`)
+- **testing-standards.md**: Test files (`test*`)
+- **authentication-security.md**: Authentication files (`*auth*`)
+- **cli-development-standards.md**: CLI files (`*cli*`)
+- **data-sanitization.md**: Sanitization files (`*sanitiz*`)
+- **mcp-integration-architecture.md**: MCP files (`*mcp*`)
+- **documentation-standards.md**: Documentation files (`*{README,CHANGELOG,*.md}`)
+- **dependency-management.md**: Dependency files (`{requirements*.txt,pyproject.toml,setup.py,package.json}`)
+- **design-patterns.md**: Pattern files (`*{service,repository,pattern}*`)
+- **clean-architecture-patterns.md**: Architecture files (`*{service,repository,model,domain}*`)
+- **python-coding-standards.md**: Python files (`*.py`)
+- **secure-coding-practices.md**: Security files (`*{security,secure,auth,valid}*`)
 
 ### Manual Inclusion
-These files are only included when explicitly referenced:
+- **development-workflow.md**: Use `#development-workflow` for Git workflow and CI/CD guidance
 
-- **development-workflow.md**: Use `#development-workflow` to include Git workflow and CI/CD guidance
+## Recent Updates
+
+All steering files have been made more concise while maintaining essential guidance:
+- Removed verbose examples and repetitive content
+- Focused on core patterns and best practices
+- Kept practical code examples that demonstrate key concepts
+- Maintained security and compatibility requirements
 
 ## Usage
 
-The steering files will automatically be included based on the files you're working with. For manual inclusion files, reference them in your chat using the `#` syntax.
-
-Example:
-```
-Help me set up a new feature branch #development-workflow
-```
-
-This ensures you get relevant guidance without overwhelming context from unrelated standards.
+Files are automatically included based on your current work context. For manual files, use `#filename` syntax in chat.

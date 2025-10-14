@@ -1,10 +1,10 @@
 {
-  "enabled": false,
+  "enabled": true,
   "name": "Update Documentation",
   "description": "Update documentation when code changes (disabled by default for performance)",
   "version": "1",
   "when": {
-    "type": "fileEdited",
+    "type": "userTriggered",
     "patterns": [
       "src/**/*.ts",
       "src/**/*.js",

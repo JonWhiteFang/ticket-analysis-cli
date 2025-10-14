@@ -884,6 +884,256 @@ pytest --cov=ticket_analyzer.models --cov-report=term-missing
 coverage-badge -o coverage.svg
 ```
 
+### CLI Testing
+
+The CLI testing framework provides comprehensive coverage for all commands, options, and error scenarios using Click's testing utilities.
+
+#### CLI Test Structure
+
+```python
+from click.testing import CliRunner
+
+class TestAnalyzeCommand:
+    """Test cases for analyze command."""
+    
+    @pytest.fixture
+    def runner(self):
+        """Click test runner."""
+        return CliRunner()
+    
+    @pytest.fixture
+    def mock_container(self):
+        """Mock dependency container with services."""
+        with patch('ticket_analyzer.cli.commands.analyze.DependencyContainer') as mock:
+            container = Mock()
+            analysis_service = Mock()
+            analysis_result = Mock()
+            analysis_result.ticket_count = 50
+            analysis_result.generated_at = datetime.now()
+            analysis_result.metrics = {'status_distribution': {'Open': 30, 'Resolved': 20}}
+            analysis_service.analyze_tickets.return_value = analysis_result
+            container.analysis_service = analysis_service
+            container.output_service = Mock()
+            mock.return_value = container
+            yield container
+    
+    def test_analyze_basic_command(self, runner, mock_container, mock_cli_context):
+        """Test basic analyze command execution."""
+        with patch('click.get_current_context') as mock_ctx:
+            mock_ctx.return_value.obj = mock_cli_context
+            
+            result = runner.invoke(analyze_command, [
+                '--status', 'Open',
+                '--days-back', '7'
+            ])
+            
+            assert result.exit_code == 0
+            assert "Analysis completed" in result.output
+            mock_container.analysis_service.analyze_tickets.assert_called_once()
+    
+    def test_analyze_with_comprehensive_options(self, runner, mock_container, mock_cli_context):
+        """Test analyze command with comprehensive options."""
+        with patch('click.get_current_context') as mock_ctx:
+            mock_ctx.return_value.obj = mock_cli_context
+            
+            result = runner.invoke(analyze_command, [
+                '--ticket-ids', 'T123456', 'T789012',
+                '--status', 'Open', 'In Progress',
+                '--severity', 'SEV_1', 'SEV_2',
+                '--assignee', 'user1', 'user2',
+                '--resolver-group', 'Team A', 'Team B',
+                '--tags', 'urgent', 'production',
+                '--search-term', 'authentication error',
+                '--priority-analysis',
+                '--trend-analysis',
+                '--team-performance',
+                '--format', 'json',
+                '--max-results', '500',
+                '--verbose'
+            ])
+            
+            assert result.exit_code == 0
+            
+            # Verify search criteria includes all filters
+            call_args = mock_container.analysis_service.analyze_tickets.call_args
+            criteria = call_args[1]['criteria']
+            assert criteria.ticket_ids == ['T123456', 'T789012']
+            assert 'Open' in criteria.status
+            assert 'In Progress' in criteria.status
+            assert 'SEV_1' in criteria.severity
+            assert 'user1' in criteria.assignee
+            assert 'Team A' in criteria.resolver_group
+            assert 'urgent' in criteria.tags
+            assert criteria.search_term == 'authentication error'
+```
+
+#### Config Command Testing
+
+```python
+class TestConfigCommand:
+    """Test cases for config command group."""
+    
+    def test_config_show_basic(self, runner, mock_container, mock_cli_context):
+        """Test basic config show command."""
+        mock_container.config_manager.get_effective_config.return_value = {
+            'auth': {'timeout_seconds': 60},
+            'report': {'format': 'json'}
+        }
+        
+        with patch('click.get_current_context') as mock_ctx:
+            mock_ctx.return_value.obj = mock_cli_context
+            
+            result = runner.invoke(show_config, [])
+            
+            assert result.exit_code == 0
+            mock_container.config_manager.get_effective_config.assert_called_once()
+    
+    def test_config_set_with_type_conversion(self, runner, mock_container, mock_cli_context):
+        """Test config set with different type conversions."""
+        test_cases = [
+            ('timeout', '120', 'int', 120),
+            ('debug_mode', 'true', 'bool', True),
+            ('tags', 'a,b,c', 'list', ['a', 'b', 'c'])
+        ]
+        
+        for key, value, type_name, expected in test_cases:
+            with patch('click.get_current_context') as mock_ctx:
+                mock_ctx.return_value.obj = mock_cli_context
+                
+                result = runner.invoke(set_config, [key, value, '--type', type_name])
+                
+                assert result.exit_code == 0
+                call_args = mock_container.config_manager.set_config_value.call_args
+                assert call_args[1]['value'] == expected
+```
+
+#### Report Command Testing
+
+```python
+class TestReportCommand:
+    """Test cases for report command group."""
+    
+    def test_report_list_with_filters(self, runner, mock_cli_context, sample_reports_dir):
+        """Test report list with format filter."""
+        with patch('click.get_current_context') as mock_ctx:
+            mock_ctx.return_value.obj = mock_cli_context
+            
+            result = runner.invoke(list_reports, [
+                '--directory', str(sample_reports_dir),
+                '--format-filter', 'json',
+                '--sort-by', 'size',
+                '--limit', '10'
+            ])
+            
+            assert result.exit_code == 0
+            # Should only show JSON files
+    
+    def test_report_convert_with_charts(self, runner, mock_container, mock_cli_context, sample_input_file):
+        """Test report conversion with charts."""
+        with patch('click.get_current_context') as mock_ctx:
+            mock_ctx.return_value.obj = mock_cli_context
+            
+            result = runner.invoke(convert_report, [
+                str(sample_input_file),
+                '--format', 'html',
+                '--include-charts',
+                '--template', 'custom_template.html'
+            ])
+            
+            assert result.exit_code == 0
+            call_args = mock_container.conversion_service.convert_report.call_args
+            assert call_args[1]['include_charts'] is True
+            assert call_args[1]['template'] == 'custom_template.html'
+```
+
+#### Error Handling Testing
+
+```python
+class TestCLIErrorHandling:
+    """Test cases for CLI error handling."""
+    
+    def test_authentication_error_handling(self, runner, mock_cli_context):
+        """Test handling of authentication errors."""
+        with patch('ticket_analyzer.cli.commands.analyze.DependencyContainer') as mock_container:
+            container = Mock()
+            container.analysis_service.analyze_tickets.side_effect = AuthenticationError("Auth failed")
+            mock_container.return_value = container
+            
+            with patch('click.get_current_context') as mock_ctx:
+                mock_ctx.return_value.obj = mock_cli_context
+                
+                result = runner.invoke(analyze_command, ['--status', 'Open'])
+                
+                assert result.exit_code == 1
+                assert "Authentication failed" in result.output
+    
+    def test_verbose_error_output(self, runner, mock_cli_context):
+        """Test verbose error output includes additional information."""
+        mock_cli_context.verbose = True
+        
+        with patch('ticket_analyzer.cli.commands.analyze.DependencyContainer') as mock_container:
+            container = Mock()
+            container.analysis_service.analyze_tickets.side_effect = AuthenticationError("Auth failed")
+            mock_container.return_value = container
+            
+            with patch('click.get_current_context') as mock_ctx:
+                mock_ctx.return_value.obj = mock_cli_context
+                
+                result = runner.invoke(analyze_command, ['--status', 'Open'])
+                
+                assert result.exit_code == 1
+                assert "Try running 'mwinit -o'" in result.output
+```
+
+#### Integration Testing
+
+```python
+class TestCLIIntegration:
+    """Integration tests for CLI commands."""
+    
+    def test_full_analysis_workflow(self, runner, sample_ticket_data, tmp_path):
+        """Test complete analysis workflow from CLI to output."""
+        with patch('ticket_analyzer.external.mcp_client.MCPClient') as mock_mcp_client:
+            with patch('ticket_analyzer.auth.midway_auth.MidwayAuthenticator') as mock_auth:
+                # Setup mocks
+                mock_auth_instance = Mock()
+                mock_auth_instance.ensure_authenticated.return_value = None
+                mock_auth.return_value = mock_auth_instance
+                
+                mock_client_instance = Mock()
+                mock_client_instance.search_tickets.return_value = [sample_ticket_data]
+                mock_mcp_client.return_value = mock_client_instance
+                
+                output_file = tmp_path / "results.json"
+                
+                result = runner.invoke(cli, [
+                    'analyze',
+                    '--format', 'json',
+                    '--output', str(output_file),
+                    '--status', 'Open',
+                    '--max-results', '10'
+                ])
+                
+                assert result.exit_code == 0
+                assert output_file.exists()
+                
+                # Verify output content
+                import json
+                with open(output_file) as f:
+                    data = json.load(f)
+                
+                assert "metrics" in data
+                assert "total_tickets" in data
+```
+
+#### Test Coverage Requirements
+
+- **CLI Commands**: 90%+ coverage for all command implementations
+- **Option Validation**: 100% coverage for all custom parameter types
+- **Error Scenarios**: All error paths must be tested
+- **Integration**: End-to-end workflow testing with mocked dependencies
+- **Signal Handling**: Graceful shutdown and cleanup testing
+
 ### Test Data Management
 
 #### Test Data Strategies

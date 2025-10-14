@@ -7,6 +7,7 @@ This directory contains comprehensive documentation for the Ticket Analysis CLI 
 ### User Documentation
 - [Installation Guide](installation.md) - Complete setup instructions
 - [User Guide](user-guide.md) - Comprehensive usage documentation
+- [CLI Reference](cli-reference.md) - Complete command-line interface documentation
 - [Configuration Guide](configuration.md) - Configuration options and examples
 - [Troubleshooting](troubleshooting.md) - Common issues and solutions
 
@@ -32,6 +33,7 @@ This directory contains comprehensive documentation for the Ticket Analysis CLI 
 
 ### For Users
 - **Getting Started**: [Installation](installation.md) → [User Guide](user-guide.md)
+- **CLI Reference**: [Complete CLI Documentation](cli-reference.md)
 - **Configuration**: [Configuration Guide](configuration.md)
 - **Issues**: [Troubleshooting](troubleshooting.md) → [FAQ](faq.md)
 
