@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*{security,secure,auth,valid}*'
+---
+
 # Secure Coding Practices
 
 ## Input Validation Patterns

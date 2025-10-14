@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*cli*'
+---
+
 # CLI Development Standards
 
 ## Click Framework Usage Patterns

@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*{service,repository,model,domain}*'
+---
+
 # Clean Architecture Patterns
 
 ## Layered Architecture Implementation

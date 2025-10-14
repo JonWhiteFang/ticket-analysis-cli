@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*auth*'
+---
+
 # Authentication Security
 
 ## Midway Authentication Best Practices

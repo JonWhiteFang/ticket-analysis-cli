@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*sanitiz*'
+---
+
 # Data Sanitization
 
 ## Ticket Data Sanitization in Logs and Outputs

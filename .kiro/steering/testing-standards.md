@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: 'test*'
+---
+
 # Testing Standards
 
 ## Pytest Framework Usage and Organization

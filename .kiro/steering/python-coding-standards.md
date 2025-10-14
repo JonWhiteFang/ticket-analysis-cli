@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*.py'
+---
+
 # Python Coding Standards
 
 ## Python 3.7 Compatibility Requirements

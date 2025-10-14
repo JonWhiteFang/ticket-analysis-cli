@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*mcp*'
+---
+
 # MCP Integration Architecture
 
 ## Builder MCP Integration Patterns

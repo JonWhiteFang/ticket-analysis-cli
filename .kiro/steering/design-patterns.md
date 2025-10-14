@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*{service,repository,pattern}*'
+---
+
 # Design Patterns
 
 ## Repository Pattern for Data Access

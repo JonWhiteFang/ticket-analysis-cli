@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '{requirements*.txt,pyproject.toml,setup.py,package.json}'
+---
+
 # Dependency Management
 
 ## Python 3.7 Compatible Dependencies

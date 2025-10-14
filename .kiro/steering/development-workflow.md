@@ -1,3 +1,7 @@
+---
+inclusion: manual
+---
+
 # Development Workflow
 
 ## Git Workflow and Branching Strategy

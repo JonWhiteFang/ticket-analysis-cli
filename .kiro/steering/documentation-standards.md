@@ -1,3 +1,8 @@
+---
+inclusion: fileMatch
+fileMatchPattern: '*{README,CHANGELOG,*.md}'
+---
+
 # Documentation Standards
 
 ## README Structure and Content Requirements
